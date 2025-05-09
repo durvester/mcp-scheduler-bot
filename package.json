@@ -28,7 +28,7 @@
   "devDependencies": {
     "@types/electron": "^1.6.12",
     "@types/express": "^5.0.0",
-    "@types/node": "^20.11.24",
+    "@types/node": "^20.17.46",
     "@types/simple-oauth2": "^5.0.7",
     "typescript": "^5.3.3"
   }

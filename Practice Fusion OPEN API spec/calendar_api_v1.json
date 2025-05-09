@@ -1,0 +1,607 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Calendar API",
+    "version": "v1"
+  },
+  "servers": [
+    {
+      "url": "https://{environment}.practicefusion.com/ehr/v1/calendar",
+      "description": "Legacy base URL for V1 of the Calendar API. Existing clients may continue to use this but all new usages should use the new base URL ending in '/ehr/calendar/v1'",
+      "variables": {
+        "environment": {
+          "default": "api",
+          "enum": [
+            "int-api",
+            "qa-api",
+            "rc-api",
+            "stg-api",
+            "pte-api",
+            "api"
+          ]
+        }
+      }
+    },
+    {
+      "url": "https://{environment}.practicefusion.com/ehr/calendar/v1",
+      "description": "New base URL that replaces the legacy one. This matches the versioning pattern for v2 and future versions.",
+      "variables": {
+        "environment": {
+          "default": "api",
+          "enum": [
+            "int-api",
+            "qa-api",
+            "rc-api",
+            "stg-api",
+            "pte-api",
+            "api"
+          ]
+        }
+      }
+    }
+  ],
+  "paths": {
+    "/events/{eventId}": {
+      "get": {
+        "tags": [
+          "CalendarEvents"
+        ],
+        "operationId": "CalendarEvents_GetCalendarEvent",
+        "summary": "Retrieve an existing event.",
+        "security": [
+          {
+            "OAuth2": [
+              "calendar:r_events_v1"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "eventId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The specified event was successfully retrieved.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CalendarEventRef"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/global.401"
+          },
+          "403": {
+            "$ref": "#/components/responses/global.403"
+          },
+          "404": {
+            "$ref": "#/components/responses/events.404"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "CalendarEvents"
+        ],
+        "operationId": "CalendarEvents_PutCalendarEvent",
+        "summary": "Update and/or cancel an existing event.",
+        "security": [
+          {
+            "OAuth2": [
+              "calendar:a_events_v1"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "eventId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CalendarEventRef"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "The specified event was successfully updated.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CalendarEventRef"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/global.400"
+          },
+          "401": {
+            "$ref": "#/components/responses/global.401"
+          },
+          "403": {
+            "$ref": "#/components/responses/global.403"
+          },
+          "404": {
+            "$ref": "#/components/responses/events.404"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "CalendarEvents"
+        ],
+        "operationId": "CalendarEvents_DeleteCalendarEvent",
+        "summary": "Delete an existing event.",
+        "security": [
+          {
+            "OAuth2": [
+              "calendar:d_events_v1"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "eventId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "The specified event was successfully deleted."
+          },
+          "401": {
+            "$ref": "#/components/responses/global.401"
+          },
+          "403": {
+            "$ref": "#/components/responses/global.403"
+          },
+          "404": {
+            "$ref": "#/components/responses/events.404"
+          }
+        }
+      }
+    },
+    "/events": {
+      "get": {
+        "tags": [
+          "CalendarEvents"
+        ],
+        "operationId": "CalendarEvents_GetCalendarEvents",
+        "summary": "Retrieve multiple existing events.",
+        "security": [
+          {
+            "OAuth2": [
+              "calendar:r_events_v1"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "eventId",
+            "in": "query",
+            "required": true,
+            "style": "form",
+            "explode": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The specified query was performed and zero or more matching events were found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CalendarEventsRef"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/global.400"
+          },
+          "401": {
+            "$ref": "#/components/responses/global.401"
+          },
+          "403": {
+            "$ref": "#/components/responses/global.403"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "CalendarEvents"
+        ],
+        "operationId": "CalendarEvents_PostCalendarEvent",
+        "summary": "Create a new event.",
+        "security": [
+          {
+            "OAuth2": [
+              "calendar:a_events_v1"
+            ]
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CalendarEventRef"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "The specified event was successfully created.",
+            "headers": {
+              "Location": {
+                "description": "The URL of the newly created event.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CalendarEventRef"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/global.400"
+          },
+          "401": {
+            "$ref": "#/components/responses/global.401"
+          },
+          "403": {
+            "$ref": "#/components/responses/global.403"
+          }
+        }
+      }
+    },
+    "/events/query": {
+      "get": {
+        "tags": [
+          "CalendarEvents"
+        ],
+        "operationId": "CalendarEvents_QueryCalendarEvents",
+        "summary": "Query for existing events that match the given criteria.",
+        "security": [
+          {
+            "OAuth2": [
+              "calendar:r_events_v1"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "minimumStartDateTimeUtc",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "maximumStartDateTimeUtc",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "eventTypeCategory",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "Appointment",
+                "BlockedTime"
+              ]
+            }
+          },
+          {
+            "name": "ehrUserGuid",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "facilityGuid",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The specified query was performed and zero or more matching events were found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CalendarEventsRef"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/global.400"
+          },
+          "401": {
+            "$ref": "#/components/responses/global.401"
+          },
+          "403": {
+            "$ref": "#/components/responses/global.403"
+          }
+        }
+      }
+    },
+    "/eventTypes": {
+      "get": {
+        "tags": [
+          "CalendarEventTypes"
+        ],
+        "operationId": "CalendarEventTypes_GetEventTypes",
+        "summary": "Retrieve all event types.",
+        "security": [
+          {
+            "OAuth2": [
+              "calendar:r_eventtypes_v1"
+            ]
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The event types for the practice were successfully retrieved.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CalendarEventTypesRef"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/global.401"
+          },
+          "403": {
+            "$ref": "#/components/responses/global.403"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "OAuth2": {
+        "type": "oauth2",
+        "flows": {
+          "implicit": {
+            "authorizationUrl": "https://{environment}.practicefusion.com/ehr/oauth2/auth",
+            "scopes": {
+              "calendar:a_events_v1": "Create/update appointments and blocked times in your practice. Includes ability to set appointment status as cancelled.",
+              "calendar:a_notes_v1": "Create/update chief complaints associated with an appointment in your practice",
+              "calendar:d_events_v1": "Delete appointments and blocked times in your practice",
+              "calendar:r_events_v1": "Read appointments, appointment cancellation and blocked times in your practice. Excludes reading detailed appointment status and confirmation.",
+              "calendar:r_eventtypes_v1": "Read appointment types and blocked time types in your practice",
+              "calendar:r_notes_v1": "Read chief complaints associated with an appointment in your practice"
+            }
+          }
+        }
+      }
+    },
+    "responses": {
+      "global.400": {
+        "description": "One or more request properties is invalid, missing, or not allowed.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResult"
+            }
+          }
+        }
+      },
+      "global.401": {
+        "description": "The caller is not authenticated."
+      },
+      "global.403": {
+        "description": "The caller is not authorized.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResult"
+            }
+          }
+        }
+      },
+      "events.404": {
+        "description": "The specified event does not exist."
+      }
+    },
+    "schemas": {
+      "ErrorResult": {
+        "type": "object",
+        "properties": {
+          "subcode": {
+            "type": "string",
+            "description": "A code that identifies the specific class of error."
+          },
+          "message": {
+            "type": "string",
+            "description": "The descriptive message of the error."
+          },
+          "validationErrors": {
+            "type": "object",
+            "description": "Dictionary of validation errors associated with specific fields.",
+            "additionalProperties": {
+              "type": "array",
+              "description": "Validation errors for an individual field.",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "details": {
+            "type": "string",
+            "description": "Extended details related to the error."
+          }
+        }
+      },
+      "CalendarEventType": {
+        "required": [
+          "eventCategory",
+          "eventTypeGuid"
+        ],
+        "type": "object",
+        "properties": {
+          "eventTypeGuid": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Identifies the type of event. Corresponds to `appointmentTypeGuid` for appointments and to\n`blockedTimeTypeGuid` for blocked times.\n"
+          },
+          "eventTypeName": {
+            "type": "string",
+            "description": "The descriptive name of the type of event identified by `eventTypeGuid`."
+          },
+          "eventCategory": {
+            "type": "string",
+            "enum": [
+              "Appointment",
+              "BlockedTime"
+            ]
+          }
+        }
+      },
+      "CalendarEvent": {
+        "required": [
+          "eventType",
+          "practiceGuid"
+        ],
+        "type": "object",
+        "properties": {
+          "eventId": {
+            "type": "string",
+            "description": "Unique identifier of the event."
+          },
+          "practiceGuid": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Identifies the practice in which the event is scheduled."
+          },
+          "ehrUserGuid": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Identifies the provider with whom the event is scheduled. Can be omitted/null for blocked times that apply\nto the whole facility or practice.\n"
+          },
+          "facilityGuid": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Identifies the facility within the practice where the event is taking place. Can be omitted/null for\nblocked times that apply to the whole practice.\n"
+          },
+          "patientPracticeGuid": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Identifies the patient the appointment is for."
+          },
+          "chiefComplaint": {
+            "type": "string",
+            "minLength": 0,
+            "maxLength": 2048,
+            "description": "Chief complaint of the patient."
+          },
+          "isCancelled": {
+            "type": "boolean",
+            "description": "Value indicating whether the appointment has been cancelled."
+          },
+          "eventType": {
+            "$ref": "#/components/schemas/CalendarEventType"
+          },
+          "startDateTimeUtc": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The start date and time of the event in UTC."
+          },
+          "startDateTimeFlt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The start date and time of the event in facility local time."
+          },
+          "duration": {
+            "type": "string",
+            "description": "The duration of the event in time span format. Example: \"0:30:00\".\n\nThe duration of an appointment must be between 1 minute and 12 hours (720 minutes). The duration of a\nblocked time must be positive and not extending past the starting calendar date.\n"
+          }
+        }
+      },
+      "CalendarEventRef": {
+        "required": [
+          "event"
+        ],
+        "type": "object",
+        "properties": {
+          "event": {
+            "$ref": "#/components/schemas/CalendarEvent"
+          }
+        }
+      },
+      "CalendarEventsRef": {
+        "type": "object",
+        "properties": {
+          "events": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CalendarEvent"
+            }
+          }
+        }
+      },
+      "CalendarEventTypesRef": {
+        "type": "object",
+        "properties": {
+          "eventTypes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CalendarEventType"
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,1509 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Patient API",
+    "version": "v4"
+  },
+  "servers": [
+    {
+      "url": "https://{environment}.practicefusion.com/ehr/v4",
+      "variables": {
+        "environment": {
+          "default": "api",
+          "enum": [
+            "int-api",
+            "qa-api",
+            "rc-api",
+            "stg-api",
+            "pte-api",
+            "api"
+          ]
+        }
+      }
+    }
+  ],
+  "paths": {
+    "/patients/{patientPracticeGuid}": {
+      "get": {
+        "tags": [
+          "Patients"
+        ],
+        "operationId": "Patients_GetPatient",
+        "summary": "Retrieve an existing patient.",
+        "security": [
+          {
+            "OAuth2": [
+              "patient:r_profile_v4",
+              "patient:r_contact_v4",
+              "patient:r_ssn_v3",
+              "patient:r_demographics_v2"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "patientPracticeGuid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "fields",
+            "in": "query",
+            "description": "The four available fields are \"profile,contact,demographics,ssn\". Each requires a specific scope. The default field is \"profile\" when no fields are specified.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The specified patient was successfully retrieved.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PatientExtendedRef"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/global.400"
+          },
+          "401": {
+            "$ref": "#/components/responses/global.401"
+          },
+          "403": {
+            "$ref": "#/components/responses/global.403"
+          },
+          "404": {
+            "$ref": "#/components/responses/global.404"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Patients"
+        ],
+        "operationId": "Patients_PutPatient",
+        "summary": "Update an existing patient.",
+        "security": [
+          {
+            "OAuth2": [
+              "patient:a_contact_v4",
+              "patient:a_ssn_v3",
+              "patient:a_demographics_v1",
+              "patient:a_active_status_v1"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "patientPracticeGuid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PatientExtendedRef"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "The specified patient was successfully updated.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PatientExtendedRef"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/global.400"
+          },
+          "401": {
+            "$ref": "#/components/responses/global.401"
+          },
+          "403": {
+            "$ref": "#/components/responses/global.403"
+          },
+          "404": {
+            "$ref": "#/components/responses/global.404"
+          }
+        }
+      }
+    },
+    "/patients": {
+      "post": {
+        "tags": [
+          "Patients"
+        ],
+        "operationId": "Patients_PostPatient",
+        "summary": "Create a new patient.",
+        "security": [
+          {
+            "OAuth2": [
+              "patient:a_contact_v4",
+              "patient:a_ssn_v3",
+              "patient:a_demographics_v1",
+              "patient:a_active_status_v1"
+            ]
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PatientExtendedRef"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "The specified patient was successfully created.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PatientExtendedRef"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/global.400"
+          },
+          "401": {
+            "$ref": "#/components/responses/global.401"
+          },
+          "403": {
+            "$ref": "#/components/responses/global.403"
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Patients"
+        ],
+        "operationId": "Patients_SearchPatient",
+        "summary": "Search patients.",
+        "security": [
+          {
+            "OAuth2": [
+              "patient:r_profile_v4",
+              "patient:r_contact_v4",
+              "patient:r_ssn_v3",
+              "patient:r_demographics_v2"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "The number of patient records to return in a single response. The value must be between 1 and 200.",
+            "schema": {
+              "type": "integer",
+              "default": 25,
+              "minimum": 1,
+              "maximum": 200
+            }
+          },
+          {
+            "name": "pageToken",
+            "in": "query",
+            "description": "An encoded token that identifies the point to resume fetching the next set of patient records. This value should be taken from the nextPageToken field in the previous API response. Used for pagination.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "minimumLastModifiedDateTime",
+            "in": "query",
+            "description": "Filters patient records modified on or after this timestamp.",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "maximumLastModifiedDateTime",
+            "in": "query",
+            "description": "Filters patient records modified on or before this timestamp.",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "fields",
+            "in": "query",
+            "description": "The four available fields are \"profile,contact,demographics,ssn\". Each requires a specific scope. The default field is \"profile\" when no fields are specified.",
+            "schema": {
+              "type": "string",
+              "default": "profile"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Indicates that the request was successful and matching patient records are returned in the response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SearchPatientsRef"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/global.400"
+          },
+          "401": {
+            "$ref": "#/components/responses/global.401"
+          },
+          "403": {
+            "$ref": "#/components/responses/global.403"
+          }
+        }
+      }
+    },
+    "/patients/{patientPracticeGuid}/preferredPharmacy": {
+      "get": {
+        "tags": [
+          "PreferredPharmacy"
+        ],
+        "operationId": "PreferredPharmacy_GetPatientPreferredPharmacy",
+        "summary": "Retrieve the preferred pharmacy of the patient.",
+        "security": [
+          {
+            "OAuth2": [
+              "patient:r_preferredPharmacy_v1"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "patientPracticeGuid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The specified patient's preferred pharmacy was successfully retrieved.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PharmacyRef"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/global.400"
+          },
+          "401": {
+            "$ref": "#/components/responses/global.401"
+          },
+          "403": {
+            "$ref": "#/components/responses/global.403"
+          },
+          "404": {
+            "$ref": "#/components/responses/global.404"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "PreferredPharmacy"
+        ],
+        "operationId": "PreferredPharmacy_PutPatientPreferredPharmacy",
+        "summary": "Update an existing patient's preferred pharmacy.",
+        "security": [
+          {
+            "OAuth2": [
+              "patient:a_preferredPharmacy_v1"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "patientPracticeGuid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "ncpdpIdentifier": {
+                    "type": "string",
+                    "description": "Pharmacy's NCPDP Identifier"
+                  }
+                },
+                "required": [
+                  "ncpdpIdentifier"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The specified patient's preferred pharmacy was successfully updated.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PharmacyRef"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/global.400"
+          },
+          "401": {
+            "$ref": "#/components/responses/global.401"
+          },
+          "403": {
+            "$ref": "#/components/responses/global.403"
+          },
+          "404": {
+            "$ref": "#/components/responses/global.404"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "PreferredPharmacy"
+        ],
+        "operationId": "PreferredPharmacy_PostPatientPreferredPharmacy",
+        "summary": "Create a preferred pharmacy for the patient.",
+        "security": [
+          {
+            "OAuth2": [
+              "patient:a_preferredPharmacy_v1"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "patientPracticeGuid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "ncpdpIdentifier": {
+                    "type": "string",
+                    "description": "Pharmacy's NCPDP Identifier"
+                  }
+                },
+                "required": [
+                  "ncpdpIdentifier"
+                ]
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "The specified patient's preferred pharmacy was successfully created.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PharmacyRef"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/global.400"
+          },
+          "401": {
+            "$ref": "#/components/responses/global.401"
+          },
+          "403": {
+            "$ref": "#/components/responses/global.403"
+          },
+          "404": {
+            "$ref": "#/components/responses/global.404"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "PreferredPharmacy"
+        ],
+        "operationId": "PreferredPharmacy_DeletePatientPreferredPharmacy",
+        "summary": "Delete an existing patient's preferred pharmacy.",
+        "security": [
+          {
+            "OAuth2": [
+              "patient:a_preferredPharmacy_v1"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "patientPracticeGuid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "The specified patient's preferred pharmacy was successfully deleted.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "nullable": true
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/global.400"
+          },
+          "401": {
+            "$ref": "#/components/responses/global.401"
+          },
+          "403": {
+            "$ref": "#/components/responses/global.403"
+          },
+          "404": {
+            "$ref": "#/components/responses/global.404"
+          }
+        }
+      }
+    },
+    "/patients/{patientPracticeGuid}/relatedPersons": {
+      "get": {
+        "tags": [
+          "RelatedPersons"
+        ],
+        "operationId": "RelatedPersons_GetAllRelatedPersons",
+        "summary": "Retrieve all related persons of an existing patient.",
+        "security": [
+          {
+            "OAuth2": [
+              "patient:r_relatedPerson_v1"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "patientPracticeGuid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The specified patient's related persons were successfully retrieved.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RelatedPersonsRef"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/global.400"
+          },
+          "401": {
+            "$ref": "#/components/responses/global.401"
+          },
+          "403": {
+            "$ref": "#/components/responses/global.403"
+          },
+          "404": {
+            "$ref": "#/components/responses/global.404"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "RelatedPersons"
+        ],
+        "operationId": "RelatedPersons_PostRelatedPerson",
+        "summary": "Create a related person for the existing patient.",
+        "security": [
+          {
+            "OAuth2": [
+              "patient:a_relatedPerson_v1"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "patientPracticeGuid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RelatedPersonRef"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "The specified related person was successfully created for the existing patient.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RelatedPersonRef"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/global.400"
+          },
+          "401": {
+            "$ref": "#/components/responses/global.401"
+          },
+          "403": {
+            "$ref": "#/components/responses/global.403"
+          },
+          "404": {
+            "$ref": "#/components/responses/global.404"
+          },
+          "409": {
+            "description": "The related person already exists for the specified patient."
+          }
+        }
+      }
+    },
+    "/patients/{patientPracticeGuid}/relatedPersons/{patientContactGuid}": {
+      "put": {
+        "tags": [
+          "RelatedPersons"
+        ],
+        "operationId": "RelatedPersons_PutRelatedPerson",
+        "summary": "Update the specified related person for an existing the patient.",
+        "security": [
+          {
+            "OAuth2": [
+              "patient:a_relatedPerson_v1"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "patientPracticeGuid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "patientContactGuid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RelatedPersonRef"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "The specified related person was successfully updated for the existing patient.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RelatedPersonRef"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/global.400"
+          },
+          "401": {
+            "$ref": "#/components/responses/global.401"
+          },
+          "403": {
+            "$ref": "#/components/responses/global.403"
+          },
+          "404": {
+            "$ref": "#/components/responses/global.404"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "RelatedPersons"
+        ],
+        "operationId": "RelatedPersons_DeleteRelatedPerson",
+        "summary": "Delete the related person for an existing patient.",
+        "security": [
+          {
+            "OAuth2": [
+              "patient:a_relatedPerson_v1"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "patientPracticeGuid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "patientContactGuid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "The specified related person was successfully deleted for the existing patient."
+          },
+          "400": {
+            "$ref": "#/components/responses/global.400"
+          },
+          "401": {
+            "$ref": "#/components/responses/global.401"
+          },
+          "403": {
+            "$ref": "#/components/responses/global.403"
+          },
+          "404": {
+            "$ref": "#/components/responses/global.404"
+          }
+        }
+      }
+    },
+    "/patients/{patientPracticeGuid}/guarantor": {
+      "parameters": [
+        {
+          "name": "patientPracticeGuid",
+          "in": "path",
+          "required": true,
+          "description": "Identifier of the patient.",
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      ],
+      "get": {
+        "tags": [
+          "Guarantor"
+        ],
+        "operationId": "Guarantor_GetPatientGuarantor",
+        "summary": "Retrieves the details of the guarantor associated with the specified patient.\nIf no guarantor is found, a 404 Not Found response will be returned.\n",
+        "security": [
+          {
+            "OAuth2": [
+              "patient:r_guarantor_v1",
+              "patient:r_guarantor_ssn_v1"
+            ]
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Guarantor details successfully retrieved for the patient.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Guarantor"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/global.400"
+          },
+          "401": {
+            "$ref": "#/components/responses/global.401"
+          },
+          "403": {
+            "$ref": "#/components/responses/global.403"
+          },
+          "404": {
+            "$ref": "#/components/responses/global.404"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Guarantor"
+        ],
+        "operationId": "Guarantor_PostPatientGuarantor",
+        "summary": "Adds guarantor details for a patient.\n",
+        "security": [
+          {
+            "OAuth2": [
+              "patient:a_guarantor_v1",
+              "patient:a_guarantor_ssn_v1",
+              "patient:r_guarantor_ssn_v1"
+            ]
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Guarantor"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Guarantor details successfully added.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Guarantor"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/global.400"
+          },
+          "401": {
+            "$ref": "#/components/responses/global.401"
+          },
+          "403": {
+            "$ref": "#/components/responses/global.403"
+          },
+          "404": {
+            "$ref": "#/components/responses/global.404"
+          },
+          "409": {
+            "description": "The guarantor already exists for the specified patient."
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Guarantor"
+        ],
+        "operationId": "Guarantor_PutPatientGuarantor",
+        "summary": "Updates guarantor details for a patient.",
+        "security": [
+          {
+            "OAuth2": [
+              "patient:a_guarantor_v1",
+              "patient:a_guarantor_ssn_v1",
+              "patient:r_guarantor_ssn_v1"
+            ]
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Guarantor"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Guarantor details successfully updated.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Guarantor"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/global.400"
+          },
+          "401": {
+            "$ref": "#/components/responses/global.401"
+          },
+          "403": {
+            "$ref": "#/components/responses/global.403"
+          },
+          "404": {
+            "$ref": "#/components/responses/global.404"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Guarantor"
+        ],
+        "operationId": "Guarantor_DeletePatientGuarantor",
+        "summary": "Deletes guarantor details for a patient.",
+        "security": [
+          {
+            "OAuth2": [
+              "patient:a_guarantor_v1"
+            ]
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Guarantor details successfully deleted."
+          },
+          "400": {
+            "$ref": "#/components/responses/global.400"
+          },
+          "401": {
+            "$ref": "#/components/responses/global.401"
+          },
+          "403": {
+            "$ref": "#/components/responses/global.403"
+          },
+          "404": {
+            "$ref": "#/components/responses/global.404"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "OAuth2": {
+        "type": "oauth2",
+        "flows": {
+          "implicit": {
+            "authorizationUrl": "https://{environment}.practicefusion.com/ehr/oauth2/auth",
+            "scopes": {
+              "patient:a_contact_v4": "Add/Update patient contact information including email, phone, address, etc.",
+              "patient:a_demographics_v1": "Add/Update patient demographics information including race, ethnicity, gender identity, etc.",
+              "patient:a_preferredPharmacy_v1": "Add/Update patient preferred pharmacy.",
+              "patient:a_ssn_v3": "Add/Update patient Social Security Number (SSN).",
+              "patient:a_relatedPerson_v1": "Add/Update patient related person.",
+              "patient:a_active_status_v1": "Add an inactive patient or change an existing patient status in the EHR.",
+              "patient:r_contact_v4": "Read patient contact information including email, phone, address, etc.",
+              "patient:r_demographics_v2": "Read patient demographics information including race, ethnicity, gender identity, etc.",
+              "patient:r_preferredPharmacy_v1": "Read patient preferred pharmacy.",
+              "patient:r_profile_v4": "Read patient profile information including full name, date of birth, sex, etc. but not including demographics, contact information and SSN.",
+              "patient:r_ssn_v3": "Read patient Social Security Number (SSN).",
+              "patient:r_relatedPerson_v1": "Read patient related person.",
+              "patient:r_guarantor_v1": "Read patient guarantor information.",
+              "patient:r_guarantor_ssn_v1": "Read patient guarantor social security number (SSN).",
+              "patient:a_guarantor_v1": "Add/Update patient guarantor information.",
+              "patient:a_guarantor_ssn_v1": "Add/Update patient guarantor social security number (SSN)."
+            }
+          }
+        }
+      }
+    },
+    "responses": {
+      "global.400": {
+        "description": "One or more request properties is invalid, missing, or not allowed.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResult"
+            }
+          }
+        }
+      },
+      "global.401": {
+        "description": "The caller is not authenticated."
+      },
+      "global.403": {
+        "description": "The caller is not authorized.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResult"
+            }
+          }
+        }
+      },
+      "global.404": {
+        "description": "The specified resource was not found.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResult"
+            }
+          }
+        }
+      }
+    },
+    "schemas": {
+      "ErrorResult": {
+        "type": "object",
+        "properties": {
+          "subcode": {
+            "type": "string",
+            "description": "A code that identifies the specific class of error."
+          },
+          "message": {
+            "type": "string",
+            "description": "The descriptive message of the error."
+          }
+        }
+      },
+      "Address": {
+        "type": "object",
+        "required": [
+          "streetAddress1",
+          "city",
+          "state",
+          "postalCode"
+        ],
+        "properties": {
+          "streetAddress1": {
+            "type": "string",
+            "description": "Street address line 1."
+          },
+          "streetAddress2": {
+            "type": "string",
+            "description": "Street address line 2."
+          },
+          "city": {
+            "type": "string",
+            "description": "Address city."
+          },
+          "state": {
+            "type": "string",
+            "description": "Address state."
+          },
+          "postalCode": {
+            "type": "string",
+            "description": "Address zip code."
+          }
+        }
+      },
+      "AddressExtended": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/InternationalAddress"
+          }
+        ],
+        "type": "object",
+        "properties": {
+          "notes": {
+            "type": "string",
+            "description": "Address notes."
+          },
+          "effectiveStartDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "Address effective start date."
+          },
+          "effectiveEndDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "Address effective end date."
+          }
+        }
+      },
+      "InternationalAddress": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Address"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "country": {
+                "type": "string",
+                "description": "Address country."
+              }
+            }
+          }
+        ]
+      },
+      "CodedOption": {
+        "required": [
+          "code",
+          "codeSystem"
+        ],
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "Identifies the option."
+          },
+          "codeSystem": {
+            "type": "string",
+            "description": "Identifies the code system."
+          },
+          "description": {
+            "type": "string",
+            "description": "Description of the option."
+          }
+        }
+      },
+      "Profile": {
+        "required": [
+          "firstName",
+          "lastName",
+          "sex",
+          "birthDate"
+        ],
+        "type": "object",
+        "properties": {
+          "firstName": {
+            "type": "string",
+            "description": "Patient's first name."
+          },
+          "lastName": {
+            "type": "string",
+            "description": "Patient's last name."
+          },
+          "sex": {
+            "type": "string",
+            "description": "Patient's gender."
+          },
+          "birthDate": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Patient's birth date."
+          },
+          "middleName": {
+            "type": "string",
+            "description": "Patient's middle name."
+          },
+          "patientRecordNumber": {
+            "type": "string",
+            "description": "Patient's record number."
+          },
+          "practiceGuid": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Identifies the practice in which the patient is created."
+          },
+          "patientPracticeGuid": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Identifies the patient."
+          },
+          "isActive": {
+            "type": "boolean",
+            "description": "Indicates if the patient is active."
+          },
+          "nickname": {
+            "type": "string",
+            "description": "Patient's nickname."
+          },
+          "suffix": {
+            "type": "string",
+            "description": "Patient's suffix."
+          },
+          "prefix": {
+            "type": "string",
+            "description": "Patient's prefix."
+          },
+          "isMultipleBirth": {
+            "type": "boolean",
+            "nullable": true,
+            "description": "Indicates if the patient was born in a twin/triplet/etc. birth."
+          },
+          "birthSequence": {
+            "type": "integer",
+            "nullable": true,
+            "description": "Indicates the birth sequence if multiple birth is true."
+          },
+          "deathDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "Patient's death date."
+          },
+          "previousFirstName": {
+            "type": "string",
+            "description": "Patient's former first name."
+          },
+          "previousMiddleName": {
+            "type": "string",
+            "description": "Patient's former middle name."
+          },
+          "previousLastName": {
+            "type": "string",
+            "description": "Patient's former last name."
+          },
+          "comments": {
+            "type": "string",
+            "description": "Comments for the patient."
+          }
+        }
+      },
+      "ContactInformation": {
+        "required": [
+          "address"
+        ],
+        "type": "object",
+        "properties": {
+          "address": {
+            "description": "Patient's primary address.",
+            "$ref": "#/components/schemas/AddressExtended"
+          },
+          "emailAddress": {
+            "type": "string",
+            "description": "Patient's email address."
+          },
+          "mobilePhone": {
+            "type": "string",
+            "description": "Patient's mobile phone number."
+          },
+          "homePhone": {
+            "type": "string",
+            "description": "Patient's home phone number."
+          },
+          "officePhone": {
+            "type": "string",
+            "description": "Patient's office phone number."
+          },
+          "officePhoneExtension": {
+            "type": "string",
+            "description": "Patient's office phone extension."
+          },
+          "doesNotHaveMobilePhone": {
+            "type": "boolean",
+            "description": "Indicates that the patient doesn't have a mobile phone number."
+          },
+          "doesNotHaveEmail": {
+            "type": "boolean",
+            "description": "Indicates that the patient doesn't have an email address."
+          },
+          "preferredMethodOfCommunication": {
+            "type": "string",
+            "description": "Indicates patient's preferred contact method."
+          }
+        }
+      },
+      "Demographics": {
+        "type": "object",
+        "properties": {
+          "raceList": {
+            "type": "array",
+            "description": "Defines the patient's race list.",
+            "items": {
+              "$ref": "#/components/schemas/CodedOption"
+            }
+          },
+          "ethnicityList": {
+            "type": "array",
+            "description": "Defines the patient's ethnicity list.",
+            "items": {
+              "$ref": "#/components/schemas/CodedOption"
+            }
+          },
+          "preferredLanguage": {
+            "description": "Defines the patient's preferred language.",
+            "$ref": "#/components/schemas/CodedOption"
+          },
+          "sexualOrientation": {
+            "description": "Defines the patient's sexual orientation.",
+            "$ref": "#/components/schemas/CodedOption"
+          },
+          "genderIdentity": {
+            "description": "Defines the patient's gender identity.",
+            "$ref": "#/components/schemas/CodedOption"
+          }
+        }
+      },
+      "PatientExtendedRef": {
+        "required": [
+          "profile",
+          "contact"
+        ],
+        "type": "object",
+        "properties": {
+          "profile": {
+            "description": "The basic profile information of the patient.",
+            "$ref": "#/components/schemas/Profile"
+          },
+          "contact": {
+            "description": "The contact information of the patient.",
+            "$ref": "#/components/schemas/ContactInformation"
+          },
+          "demographics": {
+            "description": "The demographics information of the patient.",
+            "$ref": "#/components/schemas/Demographics"
+          },
+          "socialSecurityNumber": {
+            "type": "string",
+            "description": "The social security number of the patient. (e.g., XXX-XX-XXXX)"
+          },
+          "lastModifiedDateTimeUtc": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The timestamp (in UTC) indicating when the patient was last modified."
+          }
+        }
+      },
+      "RelatedPersonRef": {
+        "required": [
+          "firstName",
+          "lastName",
+          "relationship",
+          "patientContactGuid",
+          "patientPracticeGuid"
+        ],
+        "type": "object",
+        "properties": {
+          "firstName": {
+            "type": "string",
+            "description": "Related person's first name."
+          },
+          "lastName": {
+            "type": "string",
+            "description": "Related person's last name."
+          },
+          "relationship": {
+            "description": "Identifies the relationship between the patient and the related person.",
+            "$ref": "#/components/schemas/CodedOption"
+          },
+          "middleName": {
+            "type": "string",
+            "description": "Related person's middle name."
+          },
+          "patientContactGuid": {
+            "type": "string",
+            "readOnly": true,
+            "format": "uuid",
+            "description": "Identifies the related person."
+          },
+          "patientPracticeGuid": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Identifies the patient."
+          },
+          "address": {
+            "description": "Related person's address.",
+            "$ref": "#/components/schemas/InternationalAddress"
+          },
+          "phoneNumber": {
+            "type": "string",
+            "description": "Related person's phone number."
+          }
+        }
+      },
+      "RelatedPersonsRef": {
+        "type": "object",
+        "properties": {
+          "relatedPersons": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RelatedPersonRef"
+            }
+          }
+        }
+      },
+      "PharmacyRef": {
+        "required": [
+          "ncpdpIdentifier"
+        ],
+        "type": "object",
+        "properties": {
+          "ncpdpIdentifier": {
+            "type": "string",
+            "description": "The NCPDP identifier of the pharmacy."
+          },
+          "pharmacyName": {
+            "type": "string",
+            "description": "Pharmacy name."
+          },
+          "crossStreet": {
+            "type": "string",
+            "description": "Pharmacy cross street information."
+          },
+          "officePhone": {
+            "type": "string",
+            "description": "Pharmacy phone number."
+          },
+          "officeFax": {
+            "type": "string",
+            "description": "Pharmacy fax number."
+          },
+          "npi": {
+            "type": "string",
+            "description": "NPI identifier of the pharmacy."
+          },
+          "isActive": {
+            "type": "boolean",
+            "description": "Indicates whether the pharmacy is active."
+          },
+          "pharmacySpecialties": {
+            "type": "array",
+            "description": "The specialty of the pharmacy. Examples are 'Retail, Mail', etc.",
+            "items": {
+              "type": "string"
+            }
+          },
+          "pharmacyServiceLevels": {
+            "type": "array",
+            "description": "The services level that the pharmacy provides. Examples are 'New, Change, Cancel, Refill', etc.",
+            "items": {
+              "type": "string"
+            }
+          },
+          "address": {
+            "description": "The preferred pharmacy's address.",
+            "$ref": "#/components/schemas/Address"
+          }
+        }
+      },
+      "Guarantor": {
+        "required": [
+          "firstName",
+          "lastName",
+          "sex",
+          "relationshipToPatient"
+        ],
+        "type": "object",
+        "properties": {
+          "firstName": {
+            "type": "string",
+            "maxLength": 50,
+            "description": "The guarantor's first name."
+          },
+          "lastName": {
+            "type": "string",
+            "maxLength": 50,
+            "description": "The guarantor's last name."
+          },
+          "middleInitial": {
+            "type": "string",
+            "maxLength": 2,
+            "description": "The guarantor's middle intial."
+          },
+          "sex": {
+            "type": "string",
+            "description": "The guarantor's gender. Example Male, Female or Unknown."
+          },
+          "birthDate": {
+            "type": "string",
+            "format": "date",
+            "description": "The guarantor's date of birth. (e.g., YYYY-MM-DD)."
+          },
+          "socialSecurityNumber": {
+            "type": "string",
+            "format": "ssn",
+            "description": "The guarantor's social security number. (e.g., XXX-XX-XXXX)."
+          },
+          "relationshipToPatient": {
+            "type": "string",
+            "description": "The guarantor's relationship to patient. Example Spouse, Self, Child or Other."
+          },
+          "primaryPhoneNumber": {
+            "type": "string",
+            "format": "phone",
+            "description": "The guarantor's primary phone number. (e.g., (XXX) XXX-XXXX)."
+          },
+          "primaryPhoneExtension": {
+            "type": "string",
+            "description": "The guarantor's primary phone extention."
+          },
+          "secondaryPhoneNumber": {
+            "type": "string",
+            "format": "phone",
+            "description": "The guarantor's secondary phone number. (e.g., (XXX) XXX-XXXX)."
+          },
+          "secondaryPhoneExtension": {
+            "type": "string",
+            "description": "The guarantor's secondary phone extention."
+          },
+          "address": {
+            "description": "The guarantor's address.",
+            "$ref": "#/components/schemas/Address"
+          }
+        }
+      },
+      "SearchPatientsRef": {
+        "required": [
+          "meta",
+          "patients"
+        ],
+        "type": "object",
+        "properties": {
+          "meta": {
+            "type": "object",
+            "description": "Contains the encoded token used to fetch next page of results.",
+            "properties": {
+              "nextPageToken": {
+                "type": "string",
+                "description": "An encoded token used to fetch the next page of results. Include this value in the next request’s pageToken parameter to continue retrieving data. Returned only when more records are available."
+              }
+            }
+          },
+          "patients": {
+            "type": "array",
+            "description": "An array of patient objects matching the search criteria. Empty if no records found.",
+            "items": {
+              "$ref": "#/components/schemas/PatientExtendedRef"
+            }
+          }
+        }
+      }
+    }
+  }
+}

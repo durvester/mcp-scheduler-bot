@@ -1,0 +1,1301 @@
+{
+    "openapi": "3.0.1",
+    "info": {
+      "title": "Payer API",
+      "version": "v1"
+    },
+    "servers": [
+      {
+        "url": "https://{environment}.practicefusion.com/ehr/payer/v1",
+        "variables": {
+          "environment": {
+            "default": "api",
+            "enum": [
+              "int-api",
+              "qa-api",
+              "rc-api",
+              "stg-api",
+              "pte-api",
+              "api"
+            ]
+          }
+        }
+      }
+    ],
+    "paths": {
+      "/payers": {
+        "get": {
+          "tags": [
+            "Payers"
+          ],
+          "operationId": "Payers_FindPayer",
+          "summary": "Retrieve list of payers.",
+          "security": [
+            {
+              "OAuth2": [
+                "payer:r_insurance_v1"
+              ]
+            }
+          ],
+          "parameters": [
+            {
+              "name": "payerName",
+              "in": "query",
+              "description": "Search for payers whose names begin with or include the specified name.",
+              "required": false,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "payerCode",
+              "in": "query",
+              "description": "Search for payers with the exact specified payer code.",
+              "required": false,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "pageNumber",
+              "in": "query",
+              "description": "Page number to retrieve results for a specific page. Permissible values are 1 to 200, both inclusive.",
+              "required": false,
+              "schema": {
+                "type": "integer",
+                "default": 1
+              }
+            },
+            {
+              "name": "pageSize",
+              "in": "query",
+              "description": "Page size to retrieve specific number of records per page. Permissible values are 1 to 100, both inclusive.",
+              "required": false,
+              "schema": {
+                "type": "integer",
+                "default": 50
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Payers were successfully retrieved.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/PayersRef"
+                  }
+                }
+              }
+            },
+            "400": {
+              "$ref": "#/components/responses/global.400"
+            },
+            "401": {
+              "$ref": "#/components/responses/global.401"
+            },
+            "403": {
+              "$ref": "#/components/responses/global.403"
+            },
+            "404": {
+              "$ref": "#/components/responses/global.404"
+            }
+          }
+        }
+      },
+      "/payers/{payerGuid}": {
+        "get": {
+          "tags": [
+            "Payers"
+          ],
+          "operationId": "Payers_FindPayerByPayerGuid",
+          "summary": "Retrieve payer details based on payer guid.",
+          "security": [
+            {
+              "OAuth2": [
+                "payer:r_insurance_v1"
+              ]
+            }
+          ],
+          "parameters": [
+            {
+              "name": "payerGuid",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "format": "uuid"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Payer details were successfully retrieved for the specific payer.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/PayerRef"
+                  }
+                }
+              }
+            },
+            "400": {
+              "$ref": "#/components/responses/global.400"
+            },
+            "401": {
+              "$ref": "#/components/responses/global.401"
+            },
+            "403": {
+              "$ref": "#/components/responses/global.403"
+            },
+            "404": {
+              "$ref": "#/components/responses/global.404"
+            }
+          }
+        }
+      },
+      "/payers/{payerGuid}/insurancePlans": {
+        "get": {
+          "tags": [
+            "InsurancePlans"
+          ],
+          "operationId": "InsurancePlans_GetInsurancePlans",
+          "summary": "Retrieve the insurance plans for a specific payer.",
+          "security": [
+            {
+              "OAuth2": [
+                "payer:r_insurance_plan_v1"
+              ]
+            }
+          ],
+          "parameters": [
+            {
+              "name": "payerGuid",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "format": "uuid"
+              }
+            },
+            {
+              "name": "RestrictToPracticePreferredList",
+              "in": "query",
+              "description": "Flag indicating whether to retrict the results to insurance plans that have been added to the practice's preferred list of plans.",
+              "required": false,
+              "schema": {
+                "type": "boolean",
+                "default": false
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Insurance plans were successfully retrieved for the specified payer.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/PayerInsurancePlansRef"
+                  }
+                }
+              }
+            },
+            "400": {
+              "$ref": "#/components/responses/global.400"
+            },
+            "401": {
+              "$ref": "#/components/responses/global.401"
+            },
+            "403": {
+              "$ref": "#/components/responses/global.403"
+            },
+            "404": {
+              "$ref": "#/components/responses/global.404"
+            }
+          }
+        }
+      },
+      "/payers/{payerGuid}/insurancePlans/{planGuid}": {
+        "get": {
+          "tags": [
+            "InsurancePlans"
+          ],
+          "operationId": "InsurancePlans_GetInsurancePlan",
+          "summary": "Retrieve insurance plan.",
+          "security": [
+            {
+              "OAuth2": [
+                "payer:r_insurance_plan_v1"
+              ]
+            }
+          ],
+          "parameters": [
+            {
+              "name": "payerGuid",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "format": "uuid"
+              }
+            },
+            {
+              "name": "planGuid",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "format": "uuid"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Insurance plan successfully retrieved.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/PayerInsurancePlan"
+                  }
+                }
+              }
+            },
+            "400": {
+              "$ref": "#/components/responses/global.400"
+            },
+            "401": {
+              "$ref": "#/components/responses/global.401"
+            },
+            "403": {
+              "$ref": "#/components/responses/global.403"
+            },
+            "404": {
+              "$ref": "#/components/responses/global.404"
+            }
+          }
+        }
+      },
+      "/patients/{patientPracticeGuid}/patientInsurancePlans": {
+        "get": {
+          "tags": [
+            "PatientInsurancePlans"
+          ],
+          "operationId": "PatientInsurancePlans_GetPatientInsurancePlans",
+          "summary": "Retrieve patient insurance plans.",
+          "security": [
+            {
+              "OAuth2": [
+                "patient:r_insurance_plan_v1",
+                "subscriber:r_ssn_v1"
+              ]
+            }
+          ],
+          "parameters": [
+            {
+              "name": "patientPracticeGuid",
+              "in": "path",
+              "description": "The unique identifier for a patient in practice.",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "format": "uuid"
+              }
+            },
+            {
+              "name": "coverageType",
+              "in": "query",
+              "description": "To retrieve all the records with a specific coverage type.",
+              "required": false,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "planType",
+              "in": "query",
+              "description": "To retrieve all the records with a specific plan type.",
+              "required": false,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "orderOfBenefits",
+              "in": "query",
+              "description": "To retrieve all the records with a specific order of benefits.",
+              "required": false,
+              "schema": {
+                "type": "string",
+                "default": "Primary"
+              }
+            },
+            {
+              "name": "activeOnly",
+              "in": "query",
+              "description": "To retrieve active records only.",
+              "required": false,
+              "schema": {
+                "type": "boolean",
+                "default": false
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Patient insurance plans were successfully retrieved.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "patientInsurancePlans": {
+                        "type": "array",
+                        "description": "Collection of patient insurance plans. If no plans are found, an empty array will be returned.",
+                        "items": {
+                          "$ref": "#/components/schemas/PatientInsurancePlan"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "400": {
+              "$ref": "#/components/responses/global.400"
+            },
+            "401": {
+              "$ref": "#/components/responses/global.401"
+            },
+            "403": {
+              "$ref": "#/components/responses/global.403"
+            },
+            "404": {
+              "$ref": "#/components/responses/global.404"
+            }
+          }
+        },
+        "post": {
+          "tags": [
+            "PatientInsurancePlans"
+          ],
+          "operationId": "PatientInsurancePlans_PostPatientInsurancePlan",
+          "summary": "Adds a patient insurance plan.",
+          "security": [
+            {
+              "OAuth2": [
+                "patient:a_insurance_plan_v1",
+                "subscriber:a_ssn_v1"
+              ]
+            }
+          ],
+          "parameters": [
+            {
+              "name": "patientPracticeGuid",
+              "in": "path",
+              "description": "The unique identifier for a patient in practice.",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "format": "uuid"
+              }
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/PatientInsurancePlan"
+                    },
+                    {
+                      "type": "object"
+                    }
+                  ],
+                  "properties": {
+                    "patientInsurancePlanGuid": {
+                      "readOnly": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "responses": {
+            "201": {
+              "description": "Patient insurance plan is successfully added.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/PatientInsurancePlan"
+                  }
+                }
+              }
+            },
+            "400": {
+              "$ref": "#/components/responses/global.400"
+            },
+            "401": {
+              "$ref": "#/components/responses/global.401"
+            },
+            "403": {
+              "$ref": "#/components/responses/global.403"
+            }
+          }
+        }
+      },
+      "/patients/{patientPracticeGuid}/patientInsurancePlans/{patientInsurancePlanGuid}": {
+        "get": {
+          "tags": [
+            "PatientInsurancePlans"
+          ],
+          "operationId": "PatientInsurancePlans_GetPatientInsurancePlanByPatientInsurancePlanGuid",
+          "summary": "Retrieve a patient insurance plan.",
+          "security": [
+            {
+              "OAuth2": [
+                "patient:r_insurance_plan_v1",
+                "subscriber:r_ssn_v1"
+              ]
+            }
+          ],
+          "parameters": [
+            {
+              "name": "patientPracticeGuid",
+              "in": "path",
+              "description": "The unique identifier for a patient in practice.",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "format": "uuid"
+              }
+            },
+            {
+              "name": "patientInsurancePlanGuid",
+              "in": "path",
+              "description": "The unique identifier for a patient insurance plan.",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "format": "uuid"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Patient insurance plan was successfully retrieved.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/PatientInsurancePlan"
+                  }
+                }
+              }
+            },
+            "400": {
+              "$ref": "#/components/responses/global.400"
+            },
+            "401": {
+              "$ref": "#/components/responses/global.401"
+            },
+            "403": {
+              "$ref": "#/components/responses/global.403"
+            },
+            "404": {
+              "$ref": "#/components/responses/global.404"
+            }
+          }
+        },
+        "put": {
+          "tags": [
+            "PatientInsurancePlans"
+          ],
+          "operationId": "PatientInsurancePlans_PutPatientInsurancePlan",
+          "summary": "Updates a patient insurance plan.",
+          "security": [
+            {
+              "OAuth2": [
+                "patient:a_insurance_plan_v1",
+                "subscriber:a_ssn_v1"
+              ]
+            }
+          ],
+          "parameters": [
+            {
+              "name": "patientPracticeGuid",
+              "in": "path",
+              "description": "The unique identifier for a patient in practice.",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "format": "uuid"
+              }
+            },
+            {
+              "name": "patientInsurancePlanGuid",
+              "in": "path",
+              "description": "The unique identifier for a patient insurance plan.",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "format": "uuid"
+              }
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PatientInsurancePlan"
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Patient insurance plan is successfully updated.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/PatientInsurancePlan"
+                  }
+                }
+              }
+            },
+            "400": {
+              "$ref": "#/components/responses/global.400"
+            },
+            "401": {
+              "$ref": "#/components/responses/global.401"
+            },
+            "403": {
+              "$ref": "#/components/responses/global.403"
+            },
+            "404": {
+              "$ref": "#/components/responses/global.404"
+            }
+          }
+        },
+        "delete": {
+          "tags": [
+            "PatientInsurancePlans"
+          ],
+          "operationId": "PatientInsurancePlans_DeactivatePatientInsurancePlan",
+          "summary": "Deactivates a patient insurance plan.",
+          "security": [
+            {
+              "OAuth2": [
+                "patient:a_insurance_plan_v1"
+              ]
+            }
+          ],
+          "parameters": [
+            {
+              "name": "patientPracticeGuid",
+              "in": "path",
+              "description": "The unique identifier for a patient in practice.",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "format": "uuid"
+              }
+            },
+            {
+              "name": "patientInsurancePlanGuid",
+              "in": "path",
+              "description": "The unique identifier for a patient insurance plan.",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "format": "uuid"
+              }
+            }
+          ],
+          "responses": {
+            "204": {
+              "description": "The specified patient insurance plan was successfully deactivated."
+            },
+            "400": {
+              "$ref": "#/components/responses/global.400"
+            },
+            "401": {
+              "$ref": "#/components/responses/global.401"
+            },
+            "403": {
+              "$ref": "#/components/responses/global.403"
+            },
+            "404": {
+              "$ref": "#/components/responses/global.404"
+            }
+          }
+        }
+      },
+      "/subscriberRelationshipOptions": {
+        "get": {
+          "tags": [
+            "SubscriberRelationshipOptions"
+          ],
+          "operationId": "Options_GetSubscriberRelationshipOptions",
+          "summary": "Retrieve relationship options for a subscriber",
+          "security": [
+            {
+              "OAuth2": [
+                "patient:r_insurance_plan_v1"
+              ]
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Subscriber relationship options were successfully retrieved.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            },
+            "401": {
+              "$ref": "#/components/responses/global.401"
+            },
+            "403": {
+              "$ref": "#/components/responses/global.403"
+            }
+          }
+        }
+      }
+    },
+    "components": {
+      "securitySchemes": {
+        "OAuth2": {
+          "type": "oauth2",
+          "flows": {
+            "implicit": {
+              "authorizationUrl": "https://{environment}.practicefusion.com/ehr/oauth2/auth",
+              "scopes": {
+                "payer:r_insurance_plan_v1": "Reads plan details for all payers.",
+                "payer:r_insurance_v1": "Reads list of all payers and specific payer details.",
+                "patient:r_insurance_plan_v1": "Reads all patient insurance plan details.",
+                "patient:a_insurance_plan_v1": "Adds/Updates all patient insurance plan details.",
+                "subscriber:r_ssn_v1": "Read subscriber Social Security Number (SSN).",
+                "subscriber:a_ssn_v1": "Add/Update subscriber Social Security Number (SSN)."
+              }
+            }
+          }
+        }
+      },
+      "responses": {
+        "global.400": {
+          "description": "One or more request properties is invalid, missing, or not allowed.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ErrorResult"
+              }
+            }
+          }
+        },
+        "global.401": {
+          "description": "The caller is not authenticated."
+        },
+        "global.403": {
+          "description": "The caller is not authorized.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ErrorResult"
+              }
+            }
+          }
+        },
+        "global.404": {
+          "description": "The requested resource is missing.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ErrorResult"
+              }
+            }
+          }
+        }
+      },
+      "schemas": {
+        "ErrorResult": {
+          "type": "object",
+          "properties": {
+            "subcode": {
+              "type": "string",
+              "description": "A code that identifies the specific class of error."
+            },
+            "message": {
+              "type": "string",
+              "description": "The descriptive message of the error."
+            },
+            "validationErrors": {
+              "type": "object",
+              "description": "Dictionary of validation errors associated with specific fields.",
+              "additionalProperties": {
+                "type": "array",
+                "description": "Validation errors for an individual field.",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "details": {
+              "type": "string",
+              "description": "Extended details related to the error."
+            }
+          }
+        },
+        "ClearingHouse": {
+          "type": "object",
+          "required": [
+            "clearingHouseName",
+            "payerCode"
+          ],
+          "properties": {
+            "clearingHouseName": {
+              "type": "string",
+              "description": "Represents name of the clearing house"
+            },
+            "payerCode": {
+              "type": "string",
+              "description": "Represents clearing house payer code"
+            }
+          }
+        },
+        "PlanType": {
+          "type": "string",
+          "enum": [
+            "PPO",
+            "HMO",
+            "Medicare",
+            "HSA",
+            "Private",
+            "EPO",
+            "POS",
+            "Medicaid",
+            "Dental",
+            "Vision",
+            "Other",
+            "Workers Compensation",
+            "Behavioral health",
+            "Motor Vehicle",
+            "Uninsured"
+          ]
+        },
+        "CoverageTypeCode": {
+          "type": "string",
+          "enum": [
+            "Med",
+            "Dental",
+            "Other",
+            "WC",
+            "BH",
+            "MV",
+            "Unins"
+          ]
+        },
+        "CoverageType": {
+          "type": "string",
+          "enum": [
+            "Medical",
+            "Dental",
+            "Other",
+            "Worker's Comp",
+            "Behavioral Health",
+            "Motor Vehicle",
+            "Uninsured"
+          ]
+        },
+        "OrderOfBenefits": {
+          "type": "string",
+          "enum": [
+            "Primary",
+            "Secondary",
+            "Tertiary",
+            "Unknown/None"
+          ],
+          "description": "Sequence in which multiple insurance plans pay claims in case of a dual coverage."
+        },
+        "Address": {
+          "type": "object",
+          "required": [
+            "streetAddress1",
+            "city",
+            "state",
+            "postalCode"
+          ],
+          "properties": {
+            "streetAddress1": {
+              "type": "string",
+              "description": "Address line 1"
+            },
+            "streetAddress2": {
+              "type": "string",
+              "description": "Address line 2"
+            },
+            "city": {
+              "type": "string"
+            },
+            "state": {
+              "$ref": "#/components/schemas/State"
+            },
+            "postalCode": {
+              "type": "string",
+              "pattern": "^\\d{5}(-\\d{4})?$"
+            }
+          }
+        },
+        "ContactInformation": {
+          "type": "object",
+          "properties": {
+            "address": {
+              "$ref": "#/components/schemas/Address"
+            },
+            "telephoneNumber": {
+              "type": "string",
+              "description": "Telephone number format is (XXX) XXX-XXXX."
+            },
+            "telephoneExtension": {
+              "type": "string"
+            },
+            "faxNumber": {
+              "type": "string",
+              "description": "Fax number format is (XXX) XXX-XXXX."
+            },
+            "faxExtension": {
+              "type": "string"
+            }
+          }
+        },
+        "EmployerContact": {
+          "type": "object",
+          "required": [
+            "firstName",
+            "lastName"
+          ],
+          "properties": {
+            "firstName": {
+              "type": "string"
+            },
+            "middleInitial": {
+              "type": "string"
+            },
+            "lastName": {
+              "type": "string"
+            },
+            "address": {
+              "$ref": "#/components/schemas/Address"
+            },
+            "phoneNumber": {
+              "type": "string",
+              "description": "Phone number format is (XXX) XXX-XXXX.",
+              "pattern": "\\(\\d{3}\\) \\d{3}-\\d{4}"
+            },
+            "phoneExtension": {
+              "type": "string"
+            },
+            "faxNumber": {
+              "type": "string",
+              "description": "Fax number format is (XXX) XXX-XXXX.",
+              "pattern": "\\(\\d{3}\\) \\d{3}-\\d{4}"
+            },
+            "faxExtension": {
+              "type": "string"
+            },
+            "emailAddress": {
+              "type": "string"
+            }
+          }
+        },
+        "Subscriber": {
+          "type": "object",
+          "required": [
+            "firstName",
+            "lastName",
+            "sex"
+          ],
+          "properties": {
+            "firstName": {
+              "type": "string"
+            },
+            "middleInitial": {
+              "type": "string"
+            },
+            "lastName": {
+              "type": "string"
+            },
+            "socialSecurityNumber": {
+              "type": "string",
+              "pattern": "^\\d{3}-\\d{2}-\\d{4}$"
+            },
+            "birthDate": {
+              "type": "string",
+              "format": "date",
+              "description": "Date format is YYYY-MM-DD (ISO 8601)."
+            },
+            "sex": {
+              "type": "string",
+              "enum": [
+                "Male",
+                "Female",
+                "Unknown"
+              ],
+              "nullable": true
+            },
+            "address": {
+              "$ref": "#/components/schemas/Address"
+            },
+            "primaryPhoneNumber": {
+              "type": "string",
+              "description": "Phone number format is (XXX) XXX-XXXX.",
+              "pattern": "\\(\\d{3}\\) \\d{3}-\\d{4}"
+            },
+            "primaryPhoneExtension": {
+              "type": "string"
+            },
+            "secondaryPhoneNumber": {
+              "type": "string",
+              "description": "Telephone number format is (XXX) XXX-XXXX.",
+              "pattern": "\\(\\d{3}\\) \\d{3}-\\d{4}"
+            },
+            "secondaryPhoneExtension": {
+              "type": "string"
+            }
+          }
+        },
+        "InsurancePlanSummary": {
+          "type": "object",
+          "required": [
+            "planGuid",
+            "payerGuid",
+            "coverageType",
+            "planType"
+          ],
+          "properties": {
+            "planGuid": {
+              "type": "string",
+              "format": "uuid",
+              "description": "The unique identifier for an insurance plan."
+            },
+            "payerGuid": {
+              "type": "string",
+              "format": "uuid",
+              "description": "The unique identifier for a payer.",
+              "readOnly": true
+            },
+            "coverageType": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/CoverageType"
+                }
+              ],
+              "readOnly": true
+            },
+            "planType": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/PlanType"
+                }
+              ],
+              "readOnly": true
+            }
+          }
+        },
+        "PayerInsurancePlan": {
+          "type": "object",
+          "required": [
+            "payerGuid",
+            "payerName",
+            "planGuid",
+            "planName",
+            "planType",
+            "coverageTypeCode",
+            "coverageType"
+          ],
+          "properties": {
+            "payerGuid": {
+              "type": "string",
+              "format": "uuid",
+              "description": "The unique identifier for a payer."
+            },
+            "payerName": {
+              "type": "string",
+              "description": "Represents payer name"
+            },
+            "planGuid": {
+              "type": "string",
+              "format": "uuid",
+              "description": "The unique identifier for an insurance plan."
+            },
+            "planName": {
+              "type": "string",
+              "description": "Represents insurance plan name"
+            },
+            "planType": {
+              "$ref": "#/components/schemas/PlanType"
+            },
+            "coverageTypeCode": {
+              "$ref": "#/components/schemas/CoverageTypeCode"
+            },
+            "coverageType": {
+              "$ref": "#/components/schemas/CoverageType"
+            },
+            "claimsContactInfo": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/ContactInformation"
+                },
+                {
+                  "type": "object",
+                  "required": [
+                    "address"
+                  ]
+                }
+              ]
+            },
+            "attorneyContactInfo": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/ContactInformation"
+                },
+                {
+                  "type": "object"
+                }
+              ]
+            }
+          }
+        },
+        "PatientInsurancePlan": {
+          "type": "object",
+          "required": [
+            "patientInsurancePlanGuid",
+            "patientPracticeGuid",
+            "relationshipToInsured",
+            "insuredId",
+            "orderOfBenefits",
+            "coverageStartDate",
+            "coPayType",
+            "baseCopay",
+            "insurancePlan"
+          ],
+          "properties": {
+            "patientInsurancePlanGuid": {
+              "type": "string",
+              "format": "uuid",
+              "nullable": true,
+              "description": "The unique identifier for a patient insurance plan."
+            },
+            "patientPracticeGuid": {
+              "type": "string",
+              "format": "uuid",
+              "description": "The unique identifier for a patient practice guid."
+            },
+            "relationshipToInsured": {
+              "type": "string",
+              "enum": [
+                "Self",
+                "Spouse",
+                "Child",
+                "Other"
+              ],
+              "description": "Connection between the patient and the primary policyholder of the health insurance plan."
+            },
+            "insuredId": {
+              "type": "string",
+              "description": "Unique identifier assigned to the patient by the health insurance provider."
+            },
+            "groupNumber": {
+              "type": "string",
+              "nullable": true,
+              "description": "Unique identifier to link patient to a specific coverage group."
+            },
+            "orderOfBenefits": {
+              "$ref": "#/components/schemas/OrderOfBenefits"
+            },
+            "coverageStartDate": {
+              "type": "string",
+              "format": "date-time",
+              "description": "The date and time when the patient's health insurance policy becomes active. Format - ISO 8601 (YYYY-MM-DDThh:mm:ssZ)."
+            },
+            "coverageEndDate": {
+              "type": "string",
+              "format": "date-time",
+              "nullable": true,
+              "description": "The date and time when the patient's health insurance policy expires or no longer active. Format - ISO 8601 (YYYY-MM-DDThh:mm:ssZ)."
+            },
+            "nameOfEmployer": {
+              "type": "string",
+              "nullable": true,
+              "description": "Name of the organization providing health insurance coverage to the insured."
+            },
+            "coPayType": {
+              "type": "string",
+              "enum": [
+                "Fixed",
+                "Percentage"
+              ]
+            },
+            "baseCopay": {
+              "type": "number",
+              "format": "double",
+              "description": "Initial amount a patient must pay for a medical service before insurance covers the remaining cost, based on the CoPayType."
+            },
+            "comments": {
+              "type": "string",
+              "nullable": true
+            },
+            "isActive": {
+              "type": "boolean"
+            },
+            "claimNumber": {
+              "type": "string",
+              "nullable": true
+            },
+            "insurancePlan": {
+              "$ref": "#/components/schemas/InsurancePlanSummary"
+            },
+            "employerContact": {
+              "$ref": "#/components/schemas/EmployerContact"
+            },
+            "subscriber": {
+              "$ref": "#/components/schemas/Subscriber"
+            }
+          }
+        },
+        "PayerInsurancePlansRef": {
+          "type": "object",
+          "properties": {
+            "insurancePlans": {
+              "type": "array",
+              "description": "Collection of insurance plans",
+              "items": {
+                "$ref": "#/components/schemas/PayerInsurancePlan"
+              }
+            }
+          }
+        },
+        "PayersRef": {
+          "type": "object",
+          "properties": {
+            "payers": {
+              "type": "array",
+              "description": "Collection of payers. If no payers are found, an empty array will be returned.",
+              "items": {
+                "$ref": "#/components/schemas/PayerRef"
+              }
+            },
+            "meta": {
+              "type": "object",
+              "properties": {
+                "totalPages": {
+                  "type": "integer",
+                  "description": "Total number of pages available in result."
+                },
+                "totalItems": {
+                  "type": "integer",
+                  "description": "Total count of records available in the result."
+                }
+              }
+            }
+          }
+        },
+        "PayerRef": {
+          "type": "object",
+          "required": [
+            "payerGuid",
+            "payerName"
+          ],
+          "properties": {
+            "payerGuid": {
+              "type": "string",
+              "format": "uuid",
+              "description": "Represents payer guid"
+            },
+            "payerName": {
+              "type": "string",
+              "description": "Represents payer name"
+            },
+            "clearingHouses": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/ClearingHouse"
+              }
+            }
+          }
+        },
+        "State": {
+          "type": "string",
+          "nullable": true,
+          "enum": [
+            "AL",
+            "AK",
+            "AS",
+            "AZ",
+            "AR",
+            "CA",
+            "CO",
+            "CT",
+            "DE",
+            "DC",
+            "FM",
+            "FL",
+            "GA",
+            "GU",
+            "HI",
+            "ID",
+            "IL",
+            "IN",
+            "IA",
+            "KS",
+            "KY",
+            "LA",
+            "ME",
+            "MH",
+            "MD",
+            "MA",
+            "MI",
+            "MN",
+            "MS",
+            "MO",
+            "MT",
+            "NE",
+            "NV",
+            "NH",
+            "NJ",
+            "NM",
+            "NY",
+            "NC",
+            "ND",
+            "MP",
+            "OH",
+            "OK",
+            "OR",
+            "PW",
+            "PA",
+            "PR",
+            "RI",
+            "SC",
+            "SD",
+            "TN",
+            "TX",
+            "UT",
+            "VT",
+            "VI",
+            "VA",
+            "WA",
+            "WV",
+            "WI",
+            "WY"
+          ]
+        }
+      }
+    }
+  }

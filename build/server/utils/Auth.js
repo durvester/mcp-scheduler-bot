@@ -56,17 +56,44 @@ export class Auth {
             throw new Error('No refresh token available');
         }
         try {
-            const result = await this.oauth2.createToken({
-                refresh_token: this.token.refresh_token
-            }).refresh();
+            // Create request body with exact parameters as required by Practice Fusion
+            const params = new URLSearchParams();
+            params.append('grant_type', 'refresh_token');
+            params.append('refresh_token', this.token.refresh_token);
+            params.append('redirect_uri', this.authConfig.callbackURL);
+            params.append('client_id', this.authConfig.clientId);
+            params.append('client_secret', this.authConfig.clientSecret);
+            const headers = {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            };
+            let tokenUrl = `${this.authConfig.tokenHost}${this.authConfig.tokenPath}`;
+            console.log('Token refresh request:', {
+                url: tokenUrl,
+                params: {
+                    grant_type: 'refresh_token',
+                    refresh_token: '***', // Hide token in logs
+                    redirect_uri: this.authConfig.callbackURL,
+                    client_id: this.authConfig.clientId,
+                    client_secret: '***' // Hide secret in logs
+                }
+            });
+            const response = await axios.post(tokenUrl, params.toString(), { headers });
+            console.log('Token refresh response:', {
+                status: response.status,
+                data: {
+                    ...response.data,
+                    access_token: response.data.access_token ? '***' : undefined,
+                    refresh_token: response.data.refresh_token ? '***' : undefined
+                }
+            });
             this.token = {
-                access_token: result.token.access_token,
-                refresh_token: result.token.refresh_token,
-                expires_at: new Date(result.token.expires_at)
+                access_token: response.data.access_token,
+                refresh_token: response.data.refresh_token,
+                expires_at: new Date(Date.now() + response.data.expires_in * 1000)
             };
         }
         catch (error) {
-            console.error('Token refresh failed:', error);
+            console.error('Token refresh failed:', error.response?.data || error.message);
             this.token = null;
             throw error;
         }
@@ -87,38 +114,54 @@ export class Auth {
         return this.token.access_token;
     }
     async exchangeCodeForToken(code, authMethod = 'body') {
-        // Always include these in body
+        // Create request body with exact parameters as required by Practice Fusion
         const params = new URLSearchParams();
         params.append('grant_type', 'authorization_code');
         params.append('code', code);
         params.append('redirect_uri', this.authConfig.callbackURL);
-        // Add credentials based on auth method
-        if (authMethod === 'body') {
-            params.append('client_id', this.authConfig.clientId);
-            params.append('client_secret', this.authConfig.clientSecret);
-        }
+        params.append('client_id', this.authConfig.clientId);
+        params.append('client_secret', this.authConfig.clientSecret);
         const headers = {
             'Content-Type': 'application/x-www-form-urlencoded'
         };
-        // Add Basic auth header if using header method
-        if (authMethod === 'header') {
-            const credentials = Buffer.from(`${this.authConfig.clientId}:${this.authConfig.clientSecret}`).toString('base64');
-            headers['Authorization'] = `Basic ${credentials}`;
-        }
         let tokenUrl = `${this.authConfig.tokenHost}${this.authConfig.tokenPath}`;
-        let response = null;
+        console.log('Token exchange request:', {
+            url: tokenUrl,
+            params: {
+                grant_type: 'authorization_code',
+                code: code,
+                redirect_uri: this.authConfig.callbackURL,
+                client_id: this.authConfig.clientId,
+                client_secret: '***' // Hide secret in logs
+            }
+        });
         try {
-            response = await axios.post(tokenUrl, params.toString(), // Send params as urlencoded string in body
-            { headers });
+            const response = await axios.post(tokenUrl, params.toString(), { headers });
+            console.log('Token exchange response:', {
+                status: response.status,
+                data: {
+                    ...response.data,
+                    access_token: response.data.access_token ? '***' : undefined,
+                    refresh_token: response.data.refresh_token ? '***' : undefined
+                }
+            });
+            return {
+                access_token: response.data.access_token,
+                refresh_token: response.data.refresh_token,
+                expires_at: new Date(Date.now() + response.data.expires_in * 1000)
+            };
         }
         catch (error) {
-            throw new Error(`Error getting token: ${error} . URL: ${tokenUrl}`);
+            // Log detailed error information
+            if (error.response) {
+                console.error('Token exchange failed:', {
+                    status: error.response.status,
+                    data: error.response.data,
+                    headers: error.response.headers
+                });
+            }
+            throw new Error(`Error getting token: ${error.message} . URL: ${tokenUrl}`);
         }
-        return {
-            access_token: response.data.access_token,
-            refresh_token: response.data.refresh_token,
-            expires_at: new Date(Date.now() + response.data.expires_in * 1000)
-        };
     }
     setupCallbackServer() {
         const app = express();
