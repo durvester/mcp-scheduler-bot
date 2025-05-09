@@ -113,5 +113,180 @@ export const PRACTICE_FUSION_TOOLS = [
             },
             required: ["patientPracticeGuid"]
         }
+    },
+    {
+        name: "create_patient_v4",
+        description: "Create a new patient in the Practice Fusion practice using the v4 API. Note: Phone numbers must be 10 digits, dates must be in MM/DD/YYYY format, and state codes must be valid two-letter US state codes.",
+        inputSchema: {
+            type: "object",
+            properties: {
+                profile: {
+                    type: "object",
+                    properties: {
+                        firstName: {
+                            type: "string",
+                            description: "Patient's first name"
+                        },
+                        lastName: {
+                            type: "string",
+                            description: "Patient's last name"
+                        },
+                        sex: {
+                            type: "string",
+                            enum: ["male", "female", "unknown"],
+                            description: "Patient's sex (must be one of: male, female, unknown)"
+                        },
+                        birthDate: {
+                            type: "string",
+                            format: "date",
+                            description: "Patient's birth date in MM/DD/YYYY format"
+                        },
+                        middleName: {
+                            type: "string",
+                            description: "Patient's middle name"
+                        },
+                        patientRecordNumber: {
+                            type: "string",
+                            description: "Patient's record number"
+                        },
+                        practiceGuid: {
+                            type: "string",
+                            format: "uuid",
+                            description: "Practice GUID"
+                        },
+                        isActive: {
+                            type: "boolean",
+                            description: "Whether the patient is active"
+                        },
+                        nickname: {
+                            type: "string",
+                            description: "Patient's nickname"
+                        },
+                        suffix: {
+                            type: "string",
+                            description: "Patient's suffix"
+                        },
+                        prefix: {
+                            type: "string",
+                            description: "Patient's prefix"
+                        }
+                    },
+                    required: ["firstName", "lastName", "sex", "birthDate"]
+                },
+                contact: {
+                    type: "object",
+                    properties: {
+                        address: {
+                            type: "object",
+                            properties: {
+                                streetAddress1: {
+                                    type: "string",
+                                    description: "Street address line 1"
+                                },
+                                streetAddress2: {
+                                    type: "string",
+                                    description: "Street address line 2"
+                                },
+                                city: {
+                                    type: "string",
+                                    description: "City"
+                                },
+                                state: {
+                                    type: "string",
+                                    description: "Two-letter US state code (e.g., CA, NY)"
+                                },
+                                postalCode: {
+                                    type: "string",
+                                    description: "US ZIP code (5 digits or 5+4 format)"
+                                },
+                                country: {
+                                    type: "string",
+                                    description: "Country"
+                                }
+                            },
+                            required: ["streetAddress1", "city", "state", "postalCode"]
+                        },
+                        emailAddress: {
+                            type: "string",
+                            format: "email",
+                            description: "Patient's email address (required if doesNotHaveEmail is false)"
+                        },
+                        mobilePhone: {
+                            type: "string",
+                            description: "Patient's mobile phone number (10 digits, required if doesNotHaveMobilePhone is false)"
+                        },
+                        homePhone: {
+                            type: "string",
+                            description: "Patient's home phone number (10 digits)"
+                        },
+                        officePhone: {
+                            type: "string",
+                            description: "Patient's office phone number (10 digits)"
+                        },
+                        officePhoneExtension: {
+                            type: "string",
+                            description: "Patient's office phone extension"
+                        },
+                        doesNotHaveMobilePhone: {
+                            type: "boolean",
+                            description: "Set to true if patient does not have a mobile phone"
+                        },
+                        doesNotHaveEmail: {
+                            type: "boolean",
+                            description: "Set to true if patient does not have an email address"
+                        }
+                    },
+                    required: ["address"]
+                },
+                demographics: {
+                    type: "object",
+                    properties: {
+                        raceList: {
+                            type: "array",
+                            items: {
+                                type: "object",
+                                properties: {
+                                    code: {
+                                        type: "string",
+                                        description: "Race code"
+                                    },
+                                    codeSystem: {
+                                        type: "string",
+                                        description: "Code system identifier"
+                                    },
+                                    description: {
+                                        type: "string",
+                                        description: "Race description"
+                                    }
+                                },
+                                required: ["code", "codeSystem"]
+                            }
+                        },
+                        ethnicityList: {
+                            type: "array",
+                            items: {
+                                type: "object",
+                                properties: {
+                                    code: {
+                                        type: "string",
+                                        description: "Ethnicity code"
+                                    },
+                                    codeSystem: {
+                                        type: "string",
+                                        description: "Code system identifier"
+                                    },
+                                    description: {
+                                        type: "string",
+                                        description: "Ethnicity description"
+                                    }
+                                },
+                                required: ["code", "codeSystem"]
+                            }
+                        }
+                    }
+                }
+            },
+            required: ["profile", "contact"]
+        }
     }
 ];

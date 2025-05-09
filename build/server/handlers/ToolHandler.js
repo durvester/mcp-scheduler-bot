@@ -123,6 +123,33 @@ export class ToolHandler {
                                     text: JSON.stringify(result, null, 2)
                                 }]
                         };
+                    case "create_patient_v4":
+                        const patientData = request.params?.arguments;
+                        if (!patientData) {
+                            return {
+                                content: [{
+                                        type: "text",
+                                        text: "Patient data is required"
+                                    }]
+                            };
+                        }
+                        try {
+                            result = await this.patientsClient.createPatientV4(patientData);
+                            return {
+                                content: [{
+                                        type: "text",
+                                        text: JSON.stringify(result, null, 2)
+                                    }]
+                            };
+                        }
+                        catch (error) {
+                            return {
+                                content: [{
+                                        type: "text",
+                                        text: `Error creating patient: ${error.message}`
+                                    }]
+                            };
+                        }
                     default:
                         throw new Error(`Unknown tool: ${request.params?.name}`);
                 }
