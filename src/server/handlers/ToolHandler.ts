@@ -119,6 +119,25 @@ export class ToolHandler {
                 text: JSON.stringify(result, null, 2)
               }]
             };
+          case "get_patient_v4":
+            const { patientPracticeGuid, fields } = request.params?.arguments || {};
+            
+            if (!patientPracticeGuid) {
+              return {
+                content: [{
+                  type: "text",
+                  text: "Patient Practice GUID is required"
+                }]
+              };
+            }
+
+            result = await this.patientsClient!.getPatientV4(patientPracticeGuid, fields);
+            return {
+              content: [{
+                type: "text",
+                text: JSON.stringify(result, null, 2)
+              }]
+            };
           default:
             throw new Error(`Unknown tool: ${request.params?.name}`);
         }

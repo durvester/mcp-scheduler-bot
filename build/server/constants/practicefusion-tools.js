@@ -90,5 +90,28 @@ export const PRACTICE_FUSION_TOOLS = [
             },
             required: []
         }
+    },
+    {
+        name: "get_patient_v4",
+        description: "Get a patient by their Practice Fusion ID using the v4 API. Always includes profile, contact, and demographics information.",
+        inputSchema: {
+            type: "object",
+            properties: {
+                patientPracticeGuid: {
+                    type: "string",
+                    description: "The unique identifier of the patient",
+                    format: "uuid"
+                },
+                fields: {
+                    type: "array",
+                    items: {
+                        type: "string",
+                        enum: ["profile", "contact", "demographics"]
+                    },
+                    description: "Additional fields to include in the response. Note: profile, contact, and demographics are always included."
+                }
+            },
+            required: ["patientPracticeGuid"]
+        }
     }
 ];

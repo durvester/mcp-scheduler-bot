@@ -61,6 +61,29 @@ export class PatientsClient extends PracticeFusionClient {
     }
 
     /**
+     * Get a patient by their Practice Fusion ID using v4 API
+     * @param patientPracticeGuid The unique identifier of the patient
+     * @param fields Optional array of fields to include in the response (profile, contact, demographics, ssn)
+     * @returns Promise<PatientProfile>
+     */
+    async getPatientV4(patientPracticeGuid: string, fields?: string[]): Promise<PatientProfile> {
+        if (!patientPracticeGuid) {
+            throw new Error('Patient Practice GUID is required');
+        }
+
+        // Always include profile, contact, and demographics
+        const defaultFields = ['profile', 'contact', 'demographics'];
+        const allFields = [...new Set([...defaultFields, ...(fields || [])])];
+        
+        // Remove ssn if it was included
+        const filteredFields = allFields.filter(field => field !== 'ssn');
+
+        return this.get<PatientProfile>(`/ehr/v4/patients/${patientPracticeGuid}`, {
+            fields: filteredFields.join(',')
+        });
+    }
+
+    /**
      * Helper method to parse sex/gender string to standardized format
      * @param gender The gender string to parse
      * @returns "male", "female", or "unknown"
