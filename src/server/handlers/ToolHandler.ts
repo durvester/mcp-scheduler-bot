@@ -4,7 +4,7 @@ import { Auth } from "../utils/Auth.js";
 import { AuthConfig } from "../utils/AuthConfig.js";
 import { UsersClient } from "../connectors/practicefusion/UsersClient.js";
 import { FacilitiesClient } from "../connectors/practicefusion/FacilitiesClient.js";
-import { PatientsClient, PatientSearchRequest } from "../connectors/practicefusion/PatientsClient.js";
+import { PatientsClient, PatientSearchRequest, PatientCreateRequest } from "../connectors/practicefusion/PatientsClient.js";
 import { PRACTICE_FUSION_TOOLS } from "../constants/practicefusion-tools.js";
 
 // Define request schemas
@@ -138,6 +138,34 @@ export class ToolHandler {
                 text: JSON.stringify(result, null, 2)
               }]
             };
+          case "create_patient_v4":
+            const patientData = request.params?.arguments as PatientCreateRequest;
+            
+            if (!patientData) {
+              return {
+                content: [{
+                  type: "text",
+                  text: "Patient data is required"
+                }]
+              };
+            }
+
+            try {
+              result = await this.patientsClient!.createPatientV4(patientData);
+              return {
+                content: [{
+                  type: "text",
+                  text: JSON.stringify(result, null, 2)
+                }]
+              };
+            } catch (error: any) {
+              return {
+                content: [{
+                  type: "text",
+                  text: `Error creating patient: ${error.message}`
+                }]
+              };
+            }
           default:
             throw new Error(`Unknown tool: ${request.params?.name}`);
         }
