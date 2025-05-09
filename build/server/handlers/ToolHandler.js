@@ -2,6 +2,7 @@ import { z } from "zod";
 import { Auth } from "../utils/Auth.js";
 import { UsersClient } from "../connectors/practicefusion/UsersClient.js";
 import { FacilitiesClient } from "../connectors/practicefusion/FacilitiesClient.js";
+import { PatientsClient } from "../connectors/practicefusion/PatientsClient.js";
 import { PRACTICE_FUSION_TOOLS } from "../constants/practicefusion-tools.js";
 // Define request schemas
 const listSchema = z.object({
@@ -10,7 +11,9 @@ const listSchema = z.object({
 const callSchema = z.object({
     method: z.literal("tools/call"),
     params: z.object({
-        name: z.string()
+        name: z.string(),
+        arguments: z.record(z.string(), z.any()).optional(),
+        params: z.record(z.string(), z.string()).optional()
     }).optional()
 });
 export class ToolHandler {
@@ -18,6 +21,7 @@ export class ToolHandler {
     authInitialized = false;
     usersClient;
     facilitiesClient;
+    patientsClient;
     authConfig;
     baseUrl;
     constructor(authConfig, baseUrl) {
@@ -52,6 +56,12 @@ export class ToolHandler {
                         auth: this.auth
                     });
                 }
+                if (!this.patientsClient) {
+                    this.patientsClient = new PatientsClient({
+                        baseUrl: this.baseUrl,
+                        auth: this.auth
+                    });
+                }
                 // Handle the request based on the tool name
                 let result;
                 switch (request.params?.name) {
@@ -65,6 +75,31 @@ export class ToolHandler {
                         };
                     case "get_facilities":
                         result = await this.facilitiesClient.getFacilities();
+                        return {
+                            content: [{
+                                    type: "text",
+                                    text: JSON.stringify(result, null, 2)
+                                }]
+                        };
+                    case "search_patients":
+                        const searchParams = (request.params?.arguments || {});
+                        // Remove FirstOrLastName as it's not supported by the API
+                        const { FirstOrLastName, ...apiSearchParams } = searchParams;
+                        // Validate that we have at least one search parameter (other than sex)
+                        const hasSearchParam = apiSearchParams.FirstName || apiSearchParams.LastName ||
+                            apiSearchParams.BirthDate || apiSearchParams.SocialSecurityNumber ||
+                            apiSearchParams.PatientRecordNumber || apiSearchParams.PatientPracticeGuid ||
+                            apiSearchParams.PracticeGuid;
+                        if (!hasSearchParam) {
+                            return {
+                                content: [{
+                                        type: "text",
+                                        text: "Please provide at least one search parameter (other than sex) to search for patients. Required fields include: FirstName, LastName, BirthDate, SocialSecurityNumber, PatientRecordNumber, PatientPracticeGuid, or PracticeGuid."
+                                    }]
+                            };
+                        }
+                        const onlyActive = request.params?.arguments?.onlyActive === undefined ? true : Boolean(request.params.arguments.onlyActive);
+                        result = await this.patientsClient.searchPatients(apiSearchParams, onlyActive);
                         return {
                             content: [{
                                     type: "text",
