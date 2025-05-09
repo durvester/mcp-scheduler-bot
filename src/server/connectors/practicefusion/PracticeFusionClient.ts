@@ -28,7 +28,7 @@ export class PracticeFusionClient {
         });
     }
 
-    protected async get<T>(path: string, params?: Record<string, string>): Promise<T> {
+    protected async get<T>(path: string, params?: Record<string, any>): Promise<T> {
         try {
             const response = await this.client.get(path, { params });
             return response.data;

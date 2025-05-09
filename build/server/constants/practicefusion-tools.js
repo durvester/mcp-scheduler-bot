@@ -573,5 +573,49 @@ export const PRACTICE_FUSION_TOOLS = [
             },
             required: ["patientPracticeGuid", "profile", "contact"]
         }
+    },
+    {
+        name: "get_event_types",
+        description: "Get all calendar event types in the Practice Fusion practice. This includes both appointment types and blocked time types.",
+        inputSchema: {
+            type: "object",
+            properties: {},
+            required: []
+        }
+    },
+    {
+        name: "query_events",
+        description: "Query for existing events that match the given criteria. Returns events within the specified time range and optional filters.",
+        inputSchema: {
+            type: "object",
+            properties: {
+                minimumStartDateTimeUtc: {
+                    type: "string",
+                    format: "date-time",
+                    description: "The earliest UTC start date and time for the events to be returned"
+                },
+                maximumStartDateTimeUtc: {
+                    type: "string",
+                    format: "date-time",
+                    description: "The latest UTC start date and time for the events to be returned"
+                },
+                eventTypeCategory: {
+                    type: "string",
+                    enum: ["Appointment", "BlockedTime"],
+                    description: "Filter events by category (Appointment or BlockedTime)"
+                },
+                ehrUserGuid: {
+                    type: "string",
+                    format: "uuid",
+                    description: "Filter events by provider GUID"
+                },
+                facilityGuid: {
+                    type: "string",
+                    format: "uuid",
+                    description: "Filter events by facility GUID"
+                }
+            },
+            required: ["minimumStartDateTimeUtc", "maximumStartDateTimeUtc"]
+        }
     }
 ];
