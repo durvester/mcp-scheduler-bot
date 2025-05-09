@@ -328,6 +328,87 @@ export class PatientsClient extends PracticeFusionClient {
     }
 
     /**
+     * Update an existing patient using v4 API
+     * @param patientPracticeGuid The unique identifier of the patient to update
+     * @param patientData The patient data to update
+     * @returns Promise<PatientProfile>
+     */
+    async updatePatientV4(patientPracticeGuid: string, patientData: PatientCreateRequest): Promise<PatientProfile> {
+        if (!patientPracticeGuid) {
+            throw new Error('Patient Practice GUID is required');
+        }
+
+        // Validate required fields
+        if (!patientData.profile.firstName || !patientData.profile.lastName || 
+            !patientData.profile.sex || !patientData.profile.birthDate) {
+            throw new Error('First name, last name, sex, and birth date are required');
+        }
+
+        if (!patientData.contact.address.streetAddress1 || !patientData.contact.address.city || 
+            !patientData.contact.address.state || !patientData.contact.address.postalCode) {
+            throw new Error('Street address, city, state, and postal code are required');
+        }
+
+        // Validate state code
+        if (!PatientsClient.isValidStateCode(patientData.contact.address.state)) {
+            throw new Error('Invalid state code. Please provide a valid two-letter US state code.');
+        }
+
+        // Validate ZIP code
+        if (!PatientsClient.isValidZipCode(patientData.contact.address.postalCode)) {
+            throw new Error('Invalid ZIP code. Please provide a valid US ZIP code (e.g., 12345 or 12345-6789).');
+        }
+
+        // Validate and format birth date
+        const formattedBirthDate = PatientsClient.formatDate(patientData.profile.birthDate);
+        if (!PatientsClient.isValidDate(formattedBirthDate)) {
+            throw new Error('Invalid birth date. Please provide a valid date in MM/DD/YYYY format.');
+        }
+        patientData.profile.birthDate = formattedBirthDate;
+
+        // Validate contact information based on doesNotHave flags
+        if (patientData.contact.doesNotHaveMobilePhone === false && !patientData.contact.mobilePhone) {
+            throw new Error('Mobile phone is required when doesNotHaveMobilePhone is false');
+        }
+        if (patientData.contact.doesNotHaveEmail === false && !patientData.contact.emailAddress) {
+            throw new Error('Email address is required when doesNotHaveEmail is false');
+        }
+
+        // Validate and format phone numbers if provided
+        if (patientData.contact.mobilePhone) {
+            if (!PatientsClient.isValidPhoneNumber(patientData.contact.mobilePhone)) {
+                throw new Error('Invalid mobile phone number. Please provide a valid 10-digit US phone number.');
+            }
+            patientData.contact.mobilePhone = PatientsClient.formatPhoneNumber(patientData.contact.mobilePhone);
+        }
+        if (patientData.contact.homePhone) {
+            if (!PatientsClient.isValidPhoneNumber(patientData.contact.homePhone)) {
+                throw new Error('Invalid home phone number. Please provide a valid 10-digit US phone number.');
+            }
+            patientData.contact.homePhone = PatientsClient.formatPhoneNumber(patientData.contact.homePhone);
+        }
+        if (patientData.contact.officePhone) {
+            if (!PatientsClient.isValidPhoneNumber(patientData.contact.officePhone)) {
+                throw new Error('Invalid office phone number. Please provide a valid 10-digit US phone number.');
+            }
+            patientData.contact.officePhone = PatientsClient.formatPhoneNumber(patientData.contact.officePhone);
+        }
+
+        // Validate email if provided
+        if (patientData.contact.emailAddress && !PatientsClient.isValidEmail(patientData.contact.emailAddress)) {
+            throw new Error('Invalid email address format.');
+        }
+
+        // Validate sex/gender
+        const validSexValues = ['male', 'female', 'unknown'];
+        if (!validSexValues.includes(patientData.profile.sex.toLowerCase())) {
+            throw new Error('Invalid sex value. Must be one of: male, female, unknown');
+        }
+
+        return this.put<PatientProfile>(`/ehr/v4/patients/${patientPracticeGuid}`, patientData);
+    }
+
+    /**
      * Helper method to parse sex/gender string to standardized format
      * @param gender The gender string to parse
      * @returns "male", "female", or "unknown"
