@@ -3,7 +3,7 @@ import { Auth } from "../utils/Auth.js";
 import { UsersClient } from "../connectors/practicefusion/UsersClient.js";
 import { FacilitiesClient } from "../connectors/practicefusion/FacilitiesClient.js";
 import { PatientsClient } from "../connectors/practicefusion/PatientsClient.js";
-import { CalendarClient } from "../connectors/calendar/CalendarClient.js";
+import { CalendarClient } from "../connectors/practicefusion/CalendarClient.js";
 import { PRACTICE_FUSION_TOOLS } from "../constants/practicefusion-tools.js";
 // Define request schemas
 const listSchema = z.object({
@@ -195,6 +195,23 @@ export class ToolHandler {
                         }
                     case "get_event_types":
                         result = await this.calendarClient.getEventTypes();
+                        return {
+                            content: [{
+                                    type: "text",
+                                    text: JSON.stringify(result, null, 2)
+                                }]
+                        };
+                    case "query_events":
+                        const queryParams = request.params?.arguments;
+                        if (!queryParams?.minimumStartDateTimeUtc || !queryParams?.maximumStartDateTimeUtc) {
+                            return {
+                                content: [{
+                                        type: "text",
+                                        text: "minimumStartDateTimeUtc and maximumStartDateTimeUtc are required parameters"
+                                    }]
+                            };
+                        }
+                        result = await this.calendarClient.queryEvents(queryParams);
                         return {
                             content: [{
                                     type: "text",
