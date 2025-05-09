@@ -166,6 +166,43 @@ export class ToolHandler {
                 }]
               };
             }
+          case "update_patient_v4":
+            const { patientPracticeGuid: updatePatientGuid, ...updateData } = request.params?.arguments || {};
+            
+            if (!updatePatientGuid) {
+              return {
+                content: [{
+                  type: "text",
+                  text: "Patient Practice GUID is required"
+                }]
+              };
+            }
+
+            if (!updateData) {
+              return {
+                content: [{
+                  type: "text",
+                  text: "Patient data is required"
+                }]
+              };
+            }
+
+            try {
+              result = await this.patientsClient!.updatePatientV4(updatePatientGuid, updateData as PatientCreateRequest);
+              return {
+                content: [{
+                  type: "text",
+                  text: JSON.stringify(result, null, 2)
+                }]
+              };
+            } catch (error: any) {
+              return {
+                content: [{
+                  type: "text",
+                  text: `Error updating patient: ${error.message}`
+                }]
+              };
+            }
           default:
             throw new Error(`Unknown tool: ${request.params?.name}`);
         }

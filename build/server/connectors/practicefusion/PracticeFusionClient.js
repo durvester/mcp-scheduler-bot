@@ -38,4 +38,14 @@ export class PracticeFusionClient {
             throw error;
         }
     }
+    async put(path, data) {
+        try {
+            const response = await this.client.put(path, data);
+            return response.data;
+        }
+        catch (error) {
+            console.error('PracticeFusion API error:', error.response?.data || error.message);
+            throw error;
+        }
+    }
 }
