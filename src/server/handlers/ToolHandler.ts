@@ -5,6 +5,7 @@ import { AuthConfig } from "../utils/AuthConfig.js";
 import { UsersClient } from "../connectors/practicefusion/UsersClient.js";
 import { FacilitiesClient } from "../connectors/practicefusion/FacilitiesClient.js";
 import { PatientsClient, PatientSearchRequest, PatientCreateRequest } from "../connectors/practicefusion/PatientsClient.js";
+import { CalendarClient } from "../connectors/calendar/CalendarClient.js";
 import { PRACTICE_FUSION_TOOLS } from "../constants/practicefusion-tools.js";
 
 // Define request schemas
@@ -27,6 +28,7 @@ export class ToolHandler {
   private usersClient?: UsersClient;
   private facilitiesClient?: FacilitiesClient;
   private patientsClient?: PatientsClient;
+  private calendarClient?: CalendarClient;
   private authConfig: AuthConfig;
   private baseUrl: string;
 
@@ -67,6 +69,12 @@ export class ToolHandler {
         }
         if (!this.patientsClient) {
           this.patientsClient = new PatientsClient({
+            baseUrl: this.baseUrl,
+            auth: this.auth!
+          });
+        }
+        if (!this.calendarClient) {
+          this.calendarClient = new CalendarClient({
             baseUrl: this.baseUrl,
             auth: this.auth!
           });
@@ -203,6 +211,14 @@ export class ToolHandler {
                 }]
               };
             }
+          case "get_event_types":
+            result = await this.calendarClient!.getEventTypes();
+            return {
+              content: [{
+                type: "text",
+                text: JSON.stringify(result, null, 2)
+              }]
+            };
           default:
             throw new Error(`Unknown tool: ${request.params?.name}`);
         }

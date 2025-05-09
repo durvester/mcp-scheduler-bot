@@ -573,5 +573,14 @@ export const PRACTICE_FUSION_TOOLS = [
       },
       required: ["patientPracticeGuid", "profile", "contact"]
     }
+  },
+  {
+    name: "get_event_types",
+    description: "Get all calendar event types in the Practice Fusion practice. This includes both appointment types and blocked time types.",
+    inputSchema: {
+      type: "object",
+      properties: {},
+      required: []
+    }
   }
 ]; 
