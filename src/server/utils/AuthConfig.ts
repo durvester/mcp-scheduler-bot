@@ -3,7 +3,7 @@ export interface AuthConfig {
     clientSecret: string;
     tokenHost: string;
     authorizePath: string;
-    authorizationMethod: 'body' | 'header';
+    authorizationMethod: 'body' | 'header' | 'requestbody';
     tokenPath: string;
     audience: string;
     callbackURL: string;

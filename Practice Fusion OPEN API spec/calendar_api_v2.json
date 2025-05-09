@@ -1,0 +1,870 @@
+{
+    "openapi": "3.0.1",
+    "info": {
+      "title": "Calendar API",
+      "version": "v2"
+    },
+    "servers": [
+      {
+        "url": "https://{environment}.practicefusion.com/ehr/calendar/v2",
+        "variables": {
+          "environment": {
+            "default": "api",
+            "enum": [
+              "int-api",
+              "qa-api",
+              "rc-api",
+              "stg-api",
+              "pte-api",
+              "api"
+            ]
+          }
+        }
+      }
+    ],
+    "paths": {
+      "/events/{eventId}": {
+        "get": {
+          "tags": [
+            "CalendarEvents"
+          ],
+          "operationId": "CalendarEvents_GetCalendarEvent",
+          "summary": "Retrieve an existing event.",
+          "security": [
+            {
+              "OAuth2": [
+                "calendar:r_events_v2"
+              ]
+            }
+          ],
+          "parameters": [
+            {
+              "name": "eventId",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "The specified event was successfully retrieved.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/CalendarEventRef"
+                  }
+                }
+              }
+            },
+            "401": {
+              "$ref": "#/components/responses/global.401"
+            },
+            "403": {
+              "$ref": "#/components/responses/global.403"
+            },
+            "404": {
+              "$ref": "#/components/responses/events.404"
+            }
+          }
+        },
+        "put": {
+          "tags": [
+            "CalendarEvents"
+          ],
+          "operationId": "CalendarEvents_PutCalendarEvent",
+          "summary": "Update and/or cancel an existing event.",
+          "security": [
+            {
+              "OAuth2": [
+                "calendar:a_events_v2",
+                "calendar:a_status_v1",
+                "calendar:a_confirmation_v1"
+              ]
+            }
+          ],
+          "parameters": [
+            {
+              "name": "eventId",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CalendarEventRef"
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "200": {
+              "description": "The specified event was successfully updated.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/CalendarEventRef"
+                  }
+                }
+              }
+            },
+            "400": {
+              "$ref": "#/components/responses/global.400"
+            },
+            "401": {
+              "$ref": "#/components/responses/global.401"
+            },
+            "403": {
+              "$ref": "#/components/responses/global.403"
+            },
+            "404": {
+              "$ref": "#/components/responses/events.404"
+            }
+          }
+        },
+        "delete": {
+          "tags": [
+            "CalendarEvents"
+          ],
+          "operationId": "CalendarEvents_DeleteCalendarEvent",
+          "summary": "Delete an existing event.",
+          "security": [
+            {
+              "OAuth2": [
+                "calendar:d_events_v1"
+              ]
+            }
+          ],
+          "parameters": [
+            {
+              "name": "eventId",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "204": {
+              "description": "The specified event was successfully deleted."
+            },
+            "401": {
+              "$ref": "#/components/responses/global.401"
+            },
+            "403": {
+              "$ref": "#/components/responses/global.403"
+            },
+            "404": {
+              "$ref": "#/components/responses/events.404"
+            }
+          }
+        }
+      },
+      "/events": {
+        "get": {
+          "tags": [
+            "CalendarEvents"
+          ],
+          "operationId": "CalendarEvents_GetCalendarEvents",
+          "summary": "Retrieve multiple existing events.",
+          "security": [
+            {
+              "OAuth2": [
+                "calendar:r_events_v2"
+              ]
+            }
+          ],
+          "parameters": [
+            {
+              "name": "eventId",
+              "in": "query",
+              "required": true,
+              "style": "form",
+              "explode": true,
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "The specified query was performed and zero or more matching events were found.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/CalendarEventsRef"
+                  }
+                }
+              }
+            },
+            "400": {
+              "$ref": "#/components/responses/global.400"
+            },
+            "401": {
+              "$ref": "#/components/responses/global.401"
+            },
+            "403": {
+              "$ref": "#/components/responses/global.403"
+            }
+          }
+        },
+        "post": {
+          "tags": [
+            "CalendarEvents"
+          ],
+          "operationId": "CalendarEvents_PostCalendarEvent",
+          "summary": "Create a new event.",
+          "security": [
+            {
+              "OAuth2": [
+                "calendar:a_events_v2"
+              ]
+            }
+          ],
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CalendarEventRef"
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "201": {
+              "description": "The specified event was successfully created.",
+              "headers": {
+                "Location": {
+                  "description": "The URL of the newly created event.",
+                  "schema": {
+                    "type": "string"
+                  }
+                }
+              },
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/CalendarEventRef"
+                  }
+                }
+              }
+            },
+            "400": {
+              "$ref": "#/components/responses/global.400"
+            },
+            "401": {
+              "$ref": "#/components/responses/global.401"
+            },
+            "403": {
+              "$ref": "#/components/responses/global.403"
+            }
+          }
+        }
+      },
+      "/events/query": {
+        "get": {
+          "tags": [
+            "CalendarEvents"
+          ],
+          "operationId": "CalendarEvents_QueryCalendarEvents",
+          "summary": "Query for existing events that match the given criteria.",
+          "security": [
+            {
+              "OAuth2": [
+                "calendar:r_events_v2"
+              ]
+            }
+          ],
+          "parameters": [
+            {
+              "name": "minimumStartDateTimeUtc",
+              "in": "query",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "format": "date-time"
+              }
+            },
+            {
+              "name": "maximumStartDateTimeUtc",
+              "in": "query",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "format": "date-time"
+              }
+            },
+            {
+              "name": "eventTypeCategory",
+              "in": "query",
+              "schema": {
+                "type": "string",
+                "enum": [
+                  "Appointment",
+                  "BlockedTime"
+                ]
+              }
+            },
+            {
+              "name": "ehrUserGuid",
+              "in": "query",
+              "schema": {
+                "type": "string",
+                "format": "uuid"
+              }
+            },
+            {
+              "name": "facilityGuid",
+              "in": "query",
+              "schema": {
+                "type": "string",
+                "format": "uuid"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "The specified query was performed and zero or more matching events were found.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/CalendarEventsRef"
+                  }
+                }
+              }
+            },
+            "400": {
+              "$ref": "#/components/responses/global.400"
+            },
+            "401": {
+              "$ref": "#/components/responses/global.401"
+            },
+            "403": {
+              "$ref": "#/components/responses/global.403"
+            }
+          }
+        }
+      },
+      "/freeSlots": {
+        "get": {
+          "tags": [
+            "FreeSlots"
+          ],
+          "operationId": "FreeSlots_GetFreeSlots",
+          "summary": "Retrieve available free slots that match the given criteria.\n\nA free slot refers to specific intervals within a provider's designated free time\nthat are entirely free of overlapping appointments or blocked times. These are\nthe actual, conflict-free openings available for scheduling new appointments.\n",
+          "security": [
+            {
+              "OAuth2": [
+                "calendar:r_freeslots_v2"
+              ]
+            }
+          ],
+          "parameters": [
+            {
+              "name": "minimumStartDateTimeUtc",
+              "in": "query",
+              "required": true,
+              "description": "The earliest UTC start date and time for the free slots to be returned.",
+              "schema": {
+                "type": "string",
+                "format": "date-time"
+              }
+            },
+            {
+              "name": "maximumStartDateTimeUtc",
+              "in": "query",
+              "required": true,
+              "description": "The latest UTC start date and time for the free slots to be returned. The maximum time span that can be requested is 14 days.",
+              "schema": {
+                "type": "string",
+                "format": "date-time"
+              }
+            },
+            {
+              "name": "appointmentTypeGuid",
+              "in": "query",
+              "description": "The AppointmentTypeGuid of the free slots to be returned.",
+              "schema": {
+                "type": "string",
+                "format": "uuid"
+              }
+            },
+            {
+              "name": "ehrUserGuid",
+              "in": "query",
+              "description": "The EhrUserGuid of the provider for whom free slots are being searched.",
+              "schema": {
+                "type": "string",
+                "format": "uuid"
+              }
+            },
+            {
+              "name": "facilityGuid",
+              "in": "query",
+              "description": "The FacilityGuid of the facility where free slots should be searched.",
+              "schema": {
+                "type": "string",
+                "format": "uuid"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "The specified query was performed and zero or more matching free slots were found.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/FreeSlotsRef"
+                  }
+                }
+              }
+            },
+            "400": {
+              "$ref": "#/components/responses/global.400"
+            },
+            "401": {
+              "$ref": "#/components/responses/global.401"
+            },
+            "403": {
+              "$ref": "#/components/responses/global.403"
+            }
+          }
+        }
+      },
+      "/appointmentStatusTypes": {
+        "get": {
+          "tags": [
+            "AppointmentStatusTypes"
+          ],
+          "operationId": "AppointmentStatusTypes_GetAppointmentStatusTypes",
+          "summary": "Retrieve all appointment status types.",
+          "security": [
+            {
+              "OAuth2": [
+                "calendar:r_events_v2"
+              ]
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "The appointment status types for the practice were successfully retrieved.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/AppointmentStatusTypesRef"
+                  }
+                }
+              }
+            },
+            "401": {
+              "$ref": "#/components/responses/global.401"
+            },
+            "403": {
+              "$ref": "#/components/responses/global.403"
+            }
+          }
+        }
+      },
+      "/appointmentConfirmationMethods": {
+        "get": {
+          "tags": [
+            "AppointmentConfirmationMethods"
+          ],
+          "operationId": "AppointmentConfirmationMethods_GetAppointmentConfirmationMethods",
+          "summary": "Retrieve all appointment confirmation methods.",
+          "security": [
+            {
+              "OAuth2": [
+                "calendar:r_events_v2"
+              ]
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "The appointment confirmation methods for the practice were successfully retrieved.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/AppointmentConfirmationMethodsRef"
+                  }
+                }
+              }
+            },
+            "401": {
+              "$ref": "#/components/responses/global.401"
+            },
+            "403": {
+              "$ref": "#/components/responses/global.403"
+            }
+          }
+        }
+      }
+    },
+    "components": {
+      "securitySchemes": {
+        "OAuth2": {
+          "type": "oauth2",
+          "flows": {
+            "implicit": {
+              "authorizationUrl": "https://{environment}.practicefusion.com/ehr/oauth2/auth",
+              "scopes": {
+                "calendar:a_confirmation_v1": "Update appointment confirmation for a patient",
+                "calendar:a_events_v2": "Create/update appointments and blocked times in your practice. Excludes ability to mark appointment as cancelled.",
+                "calendar:a_notes_v1": "Create/update chief complaints associated with an appointment in your practice",
+                "calendar:a_status_v1": "Update appointment status for a patient",
+                "calendar:d_events_v1": "Delete appointments and blocked times in your practice",
+                "calendar:r_events_v2": "Read appointment information, including detailed appointment status, confirmation status, available status options, confirmation options, and blocked times in your practice.",
+                "calendar:r_notes_v1": "Read chief complaints associated with an appointment in your practice",
+                "calendar:r_freeslots_v2": "Read available free slots for providers"
+              }
+            }
+          }
+        }
+      },
+      "responses": {
+        "global.400": {
+          "description": "One or more request properties is invalid, missing, or not allowed.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ErrorResult"
+              }
+            }
+          }
+        },
+        "global.401": {
+          "description": "The caller is not authenticated."
+        },
+        "global.403": {
+          "description": "The caller is not authorized.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ErrorResult"
+              }
+            }
+          }
+        },
+        "events.404": {
+          "description": "The specified event does not exist."
+        }
+      },
+      "schemas": {
+        "ErrorResult": {
+          "type": "object",
+          "properties": {
+            "subcode": {
+              "type": "string",
+              "description": "A code that identifies the specific class of error."
+            },
+            "message": {
+              "type": "string",
+              "description": "The descriptive message of the error."
+            },
+            "validationErrors": {
+              "type": "object",
+              "description": "Dictionary of validation errors associated with specific fields.",
+              "additionalProperties": {
+                "type": "array",
+                "description": "Validation errors for an individual field.",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "details": {
+              "type": "string",
+              "description": "Extended details related to the error."
+            }
+          }
+        },
+        "CalendarEventType": {
+          "required": [
+            "eventCategory",
+            "eventTypeGuid"
+          ],
+          "type": "object",
+          "properties": {
+            "eventTypeGuid": {
+              "type": "string",
+              "format": "uuid",
+              "description": "Identifies the type of event. Corresponds to `appointmentTypeGuid` for appointments and to\n`blockedTimeTypeGuid` for blocked times.\n"
+            },
+            "eventTypeName": {
+              "type": "string",
+              "description": "The descriptive name of the type of event identified by `eventTypeGuid`."
+            },
+            "eventCategory": {
+              "type": "string",
+              "enum": [
+                "Appointment",
+                "BlockedTime"
+              ]
+            }
+          }
+        },
+        "AppointmentStatus": {
+          "type": "object",
+          "properties": {
+            "statusName": {
+              "type": "string",
+              "description": "The appointment status. Sample values are 'Pending', 'InLobby', 'InRoom', 'NoShow', 'Cancelled', etc.\n"
+            },
+            "reasonForNoShowOrCancellation": {
+              "type": "string",
+              "description": "Specifies the reason when changing the status to NoShow or Cancelled."
+            },
+            "roomLocation": {
+              "type": "string",
+              "description": "Specifies the room location when changing the status to InRoom."
+            }
+          }
+        },
+        "AppointmentConfirmation": {
+          "type": "object",
+          "properties": {
+            "appointmentConfirmed": {
+              "type": "boolean",
+              "description": "Value indicating whether the appointment has been confirmed."
+            },
+            "confirmationMethodCode": {
+              "type": "string",
+              "description": "The confirmation method code. Sample values are 'SCG' (spoke with caregiver), 'PGR' (parent/guardian responded), etc."
+            },
+            "notes": {
+              "type": "string",
+              "description": "Specifies the notes when confirming the appointment."
+            },
+            "confirmedByUserGuid": {
+              "type": "string",
+              "format": "uuid",
+              "description": "Identifies the user who confirmed the appointment."
+            },
+            "confirmedAtDateTimeUtc": {
+              "type": "string",
+              "format": "date-time",
+              "description": "The date and time of when the appointment was confirmed in UTC."
+            },
+            "confirmedAtDateTimeFlt": {
+              "type": "string",
+              "format": "date-time",
+              "description": "The date and time of when the appointment was confirmed in facility local time."
+            }
+          }
+        },
+        "CalendarEvent": {
+          "required": [
+            "eventType",
+            "practiceGuid"
+          ],
+          "type": "object",
+          "properties": {
+            "eventId": {
+              "type": "string",
+              "description": "Unique identifier of the event."
+            },
+            "practiceGuid": {
+              "type": "string",
+              "format": "uuid",
+              "description": "Identifies the practice in which the event is scheduled."
+            },
+            "ehrUserGuid": {
+              "type": "string",
+              "format": "uuid",
+              "description": "Identifies the provider with whom the event is scheduled. Can be omitted/null for blocked times that apply\nto the whole facility or practice.\n"
+            },
+            "facilityGuid": {
+              "type": "string",
+              "format": "uuid",
+              "description": "Identifies the facility within the practice where the event is taking place. Can be omitted/null for\nblocked times that apply to the whole practice.\n"
+            },
+            "patientPracticeGuid": {
+              "type": "string",
+              "format": "uuid",
+              "description": "Identifies the patient the appointment is for."
+            },
+            "chiefComplaint": {
+              "type": "string",
+              "minLength": 0,
+              "maxLength": 2048,
+              "description": "Chief complaint of the patient."
+            },
+            "eventType": {
+              "$ref": "#/components/schemas/CalendarEventType"
+            },
+            "startDateTimeUtc": {
+              "type": "string",
+              "format": "date-time",
+              "description": "The start date and time of the event in UTC."
+            },
+            "startDateTimeFlt": {
+              "type": "string",
+              "format": "date-time",
+              "description": "The start date and time of the event in facility local time."
+            },
+            "duration": {
+              "type": "string",
+              "description": "The duration of the event in time span format. Example: \"0:30:00\".\n\nThe duration of an appointment must be between 1 minute and 12 hours (720 minutes). The duration of a\nblocked time must be positive and not extending past the starting calendar date.\n"
+            },
+            "appointmentConfirmation": {
+              "$ref": "#/components/schemas/AppointmentConfirmation"
+            },
+            "appointmentStatus": {
+              "$ref": "#/components/schemas/AppointmentStatus"
+            },
+            "encounterGuid": {
+              "type": "string",
+              "format": "uuid",
+              "nullable": true,
+              "description": "Identifies the encounter linked to the calendar event.\n"
+            }
+          }
+        },
+        "CalendarEventRef": {
+          "required": [
+            "event"
+          ],
+          "type": "object",
+          "properties": {
+            "event": {
+              "$ref": "#/components/schemas/CalendarEvent"
+            }
+          }
+        },
+        "CalendarEventsRef": {
+          "type": "object",
+          "properties": {
+            "events": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/CalendarEvent"
+              }
+            }
+          }
+        },
+        "FreeSlot": {
+          "required": [
+            "practiceGuid",
+            "ehrUserGuid",
+            "facilityGuid",
+            "startDateTimeUtc",
+            "startDateTimeFlt",
+            "duration",
+            "appointmentTypeGuid"
+          ],
+          "type": "object",
+          "properties": {
+            "practiceGuid": {
+              "type": "string",
+              "format": "uuid",
+              "description": "Identifies the practice in which the free slot is available."
+            },
+            "ehrUserGuid": {
+              "type": "string",
+              "format": "uuid",
+              "description": "Identifies the provider associated with the available free slot.\n"
+            },
+            "facilityGuid": {
+              "type": "string",
+              "format": "uuid",
+              "description": "Identifies the facility within the practice where the free slot is located.\n"
+            },
+            "startDateTimeUtc": {
+              "type": "string",
+              "format": "date-time",
+              "description": "The start date and time of the free slot in UTC."
+            },
+            "startDateTimeFlt": {
+              "type": "string",
+              "format": "date-time",
+              "description": "The start date and time of the free slot in facility local time."
+            },
+            "duration": {
+              "type": "string",
+              "description": "The duration of the free slot in time span format. Example: \"0:30:00\".\n"
+            },
+            "appointmentTypeGuid": {
+              "type": "string",
+              "format": "uuid",
+              "description": "Identifies the appointment type associated with the free slot, such as Follow-Up Visit, New Patient Visit, Wellness Exam, and others.\n"
+            }
+          }
+        },
+        "FreeSlotsRef": {
+          "type": "object",
+          "properties": {
+            "freeSlots": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/FreeSlot"
+              }
+            }
+          }
+        },
+        "AppointmentStatusType": {
+          "type": "object",
+          "properties": {
+            "statusName": {
+              "type": "string",
+              "description": "The appointment status type, Sample values are 'Pending','InLobby', 'InRoom', 'NoShow', etc."
+            },
+            "description": {
+              "type": "string",
+              "description": "The appointment status type, Sample values are 'Pending arrival','In lobby', 'In room', 'No show', etc."
+            },
+            "equivalentFhirStatus": {
+              "type": "string",
+              "description": "The equivalent FHIR status to help describe the meaning of the statusName. Sample values are 'pending', 'arrived', 'noshow', 'waitlist', etc."
+            }
+          }
+        },
+        "AppointmentStatusTypesRef": {
+          "type": "object",
+          "properties": {
+            "appointmentStatusTypes": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/AppointmentStatusType"
+              }
+            }
+          }
+        },
+        "AppointmentConfirmationMethod": {
+          "type": "object",
+          "properties": {
+            "code": {
+              "type": "string",
+              "description": "The appointment confirmation method code, Sample values are 'LPV', 'EMP', etc."
+            },
+            "name": {
+              "type": "string",
+              "description": "The appointment confirmation method name, Sample values are 'Patient responded via voicemail', 'Caregiver responded', etc."
+            }
+          }
+        },
+        "AppointmentConfirmationMethodsRef": {
+          "type": "object",
+          "properties": {
+            "appointmentConfirmationMethods": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/AppointmentConfirmationMethod"
+              }
+            }
+          }
+        }
+      }
+    }
+  }

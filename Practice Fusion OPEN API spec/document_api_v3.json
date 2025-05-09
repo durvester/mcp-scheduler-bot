@@ -1,0 +1,838 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Documents API",
+    "version": "v3"
+  },
+  "servers": [
+    {
+      "url": "https://{environment}.practicefusion.com/ehr/documents/v3",
+      "variables": {
+        "environment": {
+          "default": "api",
+          "enum": [
+            "int-api",
+            "qa-api",
+            "rc-api",
+            "stg-api",
+            "pte-api",
+            "api"
+          ]
+        }
+      }
+    }
+  ],
+  "paths": {
+    "/documents": {
+      "get": {
+        "tags": [
+          "Documents"
+        ],
+        "operationId": "Documents_ListDocuments",
+        "summary": "List of all documents from a practice including related resource links.",
+        "security": [
+          {
+            "OAuth2": [
+              "document:r_document_v2"
+            ]
+          },
+          {
+            "JWTAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "pageNumber",
+            "in": "query",
+            "description": "The page number of the results to fetch.\nThis is a 1-based index, meaning that the first page is 1.\n",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "The number of results per page (max 100).\nFewer results might be returned than the specified number.\n",
+            "schema": {
+              "type": "integer",
+              "default": 25,
+              "maximum": 100
+            }
+          },
+          {
+            "name": "minimumDocumentDateTime",
+            "in": "query",
+            "description": "Only return documents on or after the specified time.\nTimestamps must be between 1753-01-01 and 9999-12-31 (inclusive).\n```\nExample:\n  Wed, 02 Jan 2002 00:10:35 GMT\n  Tue, 01 Jan 2002 16:10:35 -0800\n  2002-01-01T16:10:35-08:00\n  2002-01-02T00:10:35Z\n```\n",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "maximumDocumentDateTime",
+            "in": "query",
+            "description": "Only return documents on or before the specified time.\nTimestamps must be between 1753-01-01 and 9999-12-31 (inclusive).\n```\nExample:\n  Wed, 02 Jan 2002 00:10:35 GMT\n  Tue, 01 Jan 2002 16:10:35 -0800\n  2002-01-01T16:10:35-08:00\n  2002-01-02T00:10:35Z\n```\n",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "documentType",
+            "in": "query",
+            "description": "Indicates which types of documents to return.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "patientPracticeGuid",
+            "in": "query",
+            "description": "Patient identifier to use to filter documents.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "description": "What to sort results by.\nPrefix the sort field with a minus sign (\"-\") to sort results in descending order.\n",
+            "schema": {
+              "type": "array",
+              "default": "-documentDateTime",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "documentDateTime",
+                  "-documentDateTime"
+                ]
+              }
+            },
+            "style": "form",
+            "explode": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of documents for the practice was successfully retrieved.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentsRef"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/global.400"
+          },
+          "401": {
+            "$ref": "#/components/responses/global.401"
+          },
+          "403": {
+            "$ref": "#/components/responses/global.403"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Documents"
+        ],
+        "operationId": "Documents_UploadDocument",
+        "summary": "Uploads document, with optional additional document details.",
+        "security": [
+          {
+            "OAuth2": [
+              "document:a_document_v2"
+            ]
+          },
+          {
+            "JWTAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "Content-Length",
+            "in": "header",
+            "required": true,
+            "description": "Specifies the size (max 200 MB) of the request body.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 209715200
+            }
+          },
+          {
+            "name": "Content-Type",
+            "in": "header",
+            "required": true,
+            "description": "Must be `multipart/form-data`",
+            "schema": {
+              "type": "string",
+              "example": "multipart/form-data; boundary=----WebKitFormBoundaryM296hXYCiMajl6ad"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "*Example:*\n```\nPOST /documents HTTP/1.1\nHost: api.practicefusion.com\nContent-Type: multipart/form-data; boundary=----WebKitFormBoundaryM296hXYCiMajl6ad\nContent-Length: 12345\n\n------WebKitFormBoundaryM296hXYCiMajl6ad\nContent-Disposition: form-data; name=\"documentContent\"; filename=\"document.pdf\"\nContent-Type: application/pdf\n\n(binary data here)\n------WebKitFormBoundaryM296hXYCiMajl6ad\nContent-Disposition: form-data; name=\"document\"\nContent-Type: application/json\n\n{\n  \"documentName\": \"document.pdf\",\n  \"documentType\": \"string\",\n  \"documentDateTime\": \"2002-01-02T00:10:35Z\",\n  \"comments\": \"string\",\n  \"patientPracticeGuid\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\",\n  \"assignedToEhrUserGuid\": \"0fc74a2b-98fd-4a23-b6f1-89f2016647b5\",\n  \"optOutDocumentSignTaskCreation\": true\n}\n------WebKitFormBoundaryM296hXYCiMajl6ad--\n```\n",
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "documentContent"
+                ],
+                "properties": {
+                  "documentContent": {
+                    "description": "Binary content of the document.\n  * The filename of the uploaded document cannot exceed 200 characters.\n  * The filename of the uploaded document should contain an extension. For example, `document.pdf`.\n  * The filename of the uploaded document cannot contain characters that are forbidden by the operating system for directory or file names.\n",
+                    "type": "string",
+                    "format": "binary"
+                  },
+                  "document": {
+                    "type": "object",
+                    "$ref": "#/components/schemas/DocumentAddRef"
+                  }
+                }
+              },
+              "encoding": {
+                "documentContent": {
+                  "contentType": "application/octet-stream"
+                },
+                "document": {
+                  "contentType": "application/json"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Document has been successfully uploaded. **Note**: Uploading a document over 1 MB may take longer to process.\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentsRef"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/global.400"
+          },
+          "401": {
+            "$ref": "#/components/responses/global.401"
+          },
+          "403": {
+            "$ref": "#/components/responses/global.403"
+          },
+          "413": {
+            "description": "Request payload exceeds the maximum allowed size of 200 MB."
+          }
+        }
+      }
+    },
+    "/documents/{documentGuid}": {
+      "get": {
+        "tags": [
+          "Documents"
+        ],
+        "operationId": "Documents_GetDocument",
+        "summary": "Returns the document for the specified document identifier including related resource links.",
+        "security": [
+          {
+            "OAuth2": [
+              "document:r_document_v2"
+            ]
+          },
+          {
+            "JWTAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "documentGuid",
+            "in": "path",
+            "description": "Identifier of the document.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The specified document was successfully retrieved.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Document"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/global.400"
+          },
+          "401": {
+            "$ref": "#/components/responses/global.401"
+          },
+          "403": {
+            "$ref": "#/components/responses/global.403"
+          },
+          "404": {
+            "$ref": "#/components/responses/global.404"
+          }
+        }
+      }
+    },
+    "/documents/{documentGuid}/content": {
+      "get": {
+        "tags": [
+          "Documents"
+        ],
+        "operationId": "Documents_GetDocumentContent",
+        "summary": "Returns the binary content of the document for the specified document identifier.",
+        "security": [
+          {
+            "OAuth2": [
+              "document:r_document_v2"
+            ]
+          },
+          {
+            "JWTAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "documentGuid",
+            "in": "path",
+            "required": true,
+            "description": "Identifier of the document.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The binary content of the specified document was successfully retrieved.",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/global.400"
+          },
+          "401": {
+            "$ref": "#/components/responses/global.401"
+          },
+          "403": {
+            "$ref": "#/components/responses/global.403"
+          },
+          "404": {
+            "$ref": "#/components/responses/global.404"
+          }
+        }
+      }
+    },
+    "/documentTypes": {
+      "get": {
+        "tags": [
+          "Document Types"
+        ],
+        "operationId": "DocumentTypes_ListDocumentTypes",
+        "summary": "List of all document types from a practice including related resource links.",
+        "security": [
+          {
+            "OAuth2": [
+              "document:r_document_types_v2"
+            ]
+          },
+          {
+            "JWTAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "activeOnly",
+            "in": "query",
+            "required": false,
+            "description": "Indicates whether to filter results by active status.\nTrue for active, false for both active and inactive.\n",
+            "schema": {
+              "type": "boolean",
+              "default": true
+            }
+          },
+          {
+            "name": "pageNumber",
+            "in": "query",
+            "description": "The page number of the results to fetch.\nThis is a 1-based index, meaning that the first page is 1.\n",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "The number of results per page (max 100).\nFewer results might be returned than the specified number.\n",
+            "schema": {
+              "type": "integer",
+              "default": 25,
+              "maximum": 100
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of document types for the practice was successfully retrieved.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentTypesRef"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/global.400"
+          },
+          "401": {
+            "$ref": "#/components/responses/global.401"
+          },
+          "403": {
+            "$ref": "#/components/responses/global.403"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Document Types"
+        ],
+        "operationId": "DocumentTypes_AddCustomDocumentType",
+        "summary": "Adds a custom document type to a practice if it does not exist, or updates an existing one based on the provided input.\nThis operation is idempotent.\n",
+        "security": [
+          {
+            "OAuth2": [
+              "document:a_document_types_v2"
+            ]
+          },
+          {
+            "JWTAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddDocumentType"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Returns the updated custom document type or the existing one.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentType"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "Returns the created custom document type.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentType"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/global.400"
+          },
+          "401": {
+            "$ref": "#/components/responses/global.401"
+          },
+          "403": {
+            "$ref": "#/components/responses/global.403"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "OAuth2": {
+        "type": "oauth2",
+        "flows": {
+          "implicit": {
+            "authorizationUrl": "https://{environment}.practicefusion.com/ehr/oauth2/auth",
+            "scopes": {
+              "document:r_document_v2": "Access documents from your practice.",
+              "document:a_document_v2": "Add a document to your practice and optionally assign the document to a provider or patient.",
+              "document:r_document_types_v2": "Read document types used in your practice.",
+              "document:a_document_types_v2": "Add or update a document type to your practice."
+            }
+          }
+        }
+      },
+      "JWTAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "responses": {
+      "global.400": {
+        "description": "One or more request properties is invalid, missing, or not allowed.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResult"
+            }
+          }
+        }
+      },
+      "global.401": {
+        "description": "The caller is not authenticated."
+      },
+      "global.403": {
+        "description": "The caller is not authorized.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResult"
+            }
+          }
+        }
+      },
+      "global.404": {
+        "description": "The specified resource was not found.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResult"
+            }
+          }
+        }
+      }
+    },
+    "schemas": {
+      "ErrorResult": {
+        "type": "object",
+        "properties": {
+          "subcode": {
+            "type": "string",
+            "description": "A code that identifies the specific class of error."
+          },
+          "message": {
+            "type": "string",
+            "description": "The descriptive message of the error."
+          },
+          "validationErrors": {
+            "type": "object",
+            "description": "Dictionary of validation errors associated with specific fields.",
+            "additionalProperties": {
+              "type": "array",
+              "description": "Validation errors for an individual field.",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "details": {
+            "type": "string",
+            "description": "Extended details related to the error."
+          }
+        }
+      },
+      "Document": {
+        "description": "Representation of the document in Practice Fusion EHR.",
+        "required": [
+          "documentGuid",
+          "documentName",
+          "documentType",
+          "isSigned",
+          "documentContentMetadata",
+          "meta"
+        ],
+        "type": "object",
+        "properties": {
+          "documentGuid": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Unique identifier of the document."
+          },
+          "documentName": {
+            "type": "string",
+            "description": "Name of the document inputted by the provider."
+          },
+          "documentType": {
+            "type": "string",
+            "description": "Type assigned to the document by the provider."
+          },
+          "documentDateTime": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Date inputted by the provider when the document was uploaded.\nThis is a timestamp in ISO 8601 UTC format: YYYY-MM-DDTHH:MM:SSZ.\n"
+          },
+          "comments": {
+            "type": "string",
+            "description": "Comments entered by the provider when the document was uploaded."
+          },
+          "patientPracticeGuid": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Identifier of the patient associated with this document."
+          },
+          "assignedToEhrUserGuid": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Identifier of the provider to whom this document is assigned."
+          },
+          "isSigned": {
+            "type": "boolean",
+            "description": "Value indicating whether the document has been signed by the provider.\n"
+          },
+          "signedByEhrUserGuid": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Identifier of the provider who signed the document."
+          },
+          "documentContentMetadata": {
+            "$ref": "#/components/schemas/DocumentContentMetadata"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/MetaRef"
+          }
+        }
+      },
+      "DocumentContentMetadata": {
+        "description": "Metadata of the document content.",
+        "required": [
+          "filename",
+          "mediaType",
+          "size",
+          "status"
+        ],
+        "type": "object",
+        "properties": {
+          "filename": {
+            "type": "string",
+            "description": "Filename of the document.\nThis is the name of the file that was uploaded.\n"
+          },
+          "mediaType": {
+            "type": "string",
+            "description": "Media type of the document content. For example, application/pdf."
+          },
+          "size": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Size of the document content in bytes."
+          },
+          "status": {
+            "type": "string",
+            "description": "Document Content Status:\n  * Processing - The upload of the document content is still in progress\n  * Ready - Document content is ready for download\n",
+            "enum": [
+              "Processing",
+              "Ready"
+            ]
+          }
+        }
+      },
+      "DocumentAddRef": {
+        "description": "Representation of the document in Practice Fusion EHR.",
+        "required": [
+          "documentName",
+          "documentType"
+        ],
+        "type": "object",
+        "properties": {
+          "documentName": {
+            "type": "string",
+            "description": "Name (max 200 characters) of the document.",
+            "minimum": 1,
+            "maximum": 200
+          },
+          "documentType": {
+            "type": "string",
+            "description": "Type to be assigned to the document, must be a valid document type."
+          },
+          "documentDateTime": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Date of the document.\nTimestamps must be between 1753-01-01 and 9999-12-31 (inclusive).\n```\nExample:\n  Wed, 02 Jan 2002 00:10:35 GMT\n  Tue, 01 Jan 2002 16:10:35 -0800\n  2002-01-01T16:10:35-08:00\n  2002-01-02T00:10:35Z\n```\n"
+          },
+          "comments": {
+            "type": "string",
+            "description": "Comments (max 1000 characters) related to the document.",
+            "maximum": 1000
+          },
+          "patientPracticeGuid": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Identifier of the patient associated with the document."
+          },
+          "assignedToEhrUserGuid": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Identifier of the provider to whom the document should be assigned."
+          },
+          "optOutDocumentSignTaskCreation": {
+            "type": "boolean",
+            "description": "Value indicating if an EHR task should be created to remind the provider to sign a document.\nTask will not be created if the value is true.\nTask will be created if the value is false or not provided.\nRefer to the [Knowledge Base](https://help.practicefusion.com/apex/SLDSVideoPage?id=qgx0b3val1) for more information.\n"
+          }
+        }
+      },
+      "DocumentsRef": {
+        "type": "object",
+        "required": [
+          "documents",
+          "meta"
+        ],
+        "properties": {
+          "documents": {
+            "type": "array",
+            "description": "List of documents for the practice.\nWill be an empty array if no results are returned.\n",
+            "items": {
+              "$ref": "#/components/schemas/Document"
+            }
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PagedResultMetaRef"
+          }
+        }
+      },
+      "MetaRef": {
+        "type": "object",
+        "description": "Metadata about the returned data.",
+        "required": [
+          "links"
+        ],
+        "properties": {
+          "links": {
+            "type": "object",
+            "description": "Related resource links.",
+            "required": [
+              "self",
+              "content"
+            ],
+            "properties": {
+              "self": {
+                "type": "string",
+                "format": "uri",
+                "description": "A link to the current resource."
+              },
+              "content": {
+                "type": "string",
+                "format": "uri",
+                "description": "A link to the document content resource."
+              }
+            }
+          }
+        }
+      },
+      "PagedResultMetaRef": {
+        "type": "object",
+        "description": "Metadata about the returned data.",
+        "required": [
+          "links"
+        ],
+        "properties": {
+          "links": {
+            "description": "Related resource links.",
+            "required": [
+              "self",
+              "prev",
+              "next"
+            ],
+            "properties": {
+              "self": {
+                "type": "string",
+                "format": "uri",
+                "description": "A link to the current page of data."
+              },
+              "prev": {
+                "type": "string",
+                "format": "uri",
+                "description": "A link to the previous page of data."
+              },
+              "next": {
+                "type": "string",
+                "format": "uri",
+                "description": "A link to the next page of data."
+              }
+            }
+          }
+        }
+      },
+      "DocumentType": {
+        "type": "object",
+        "description": "Representation of the document type in Practice Fusion EHR.",
+        "required": [
+          "documentType",
+          "isActive"
+        ],
+        "properties": {
+          "documentType": {
+            "type": "string",
+            "description": "Type of the document.",
+            "maxLength": 50
+          },
+          "isActive": {
+            "type": "boolean",
+            "description": "Value indicating whether the document type is active."
+          }
+        }
+      },
+      "AddDocumentType": {
+        "type": "object",
+        "description": "Representation of the custom document type.",
+        "required": [
+          "documentType"
+        ],
+        "properties": {
+          "documentType": {
+            "type": "string",
+            "description": "Type of the document.",
+            "maxLength": 50
+          }
+        }
+      },
+      "DocumentTypesRef": {
+        "type": "object",
+        "required": [
+          "documentTypes",
+          "meta"
+        ],
+        "properties": {
+          "documentTypes": {
+            "type": "array",
+            "description": "List of document types for the practice.\nWill be an empty array if no results are returned.\n",
+            "items": {
+              "$ref": "#/components/schemas/DocumentType"
+            }
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PagedResultMetaRef"
+          }
+        }
+      }
+    }
+  }
+}
