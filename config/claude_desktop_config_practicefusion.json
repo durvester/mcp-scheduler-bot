@@ -6,8 +6,8 @@
           "/Users/m858450/Documents/mcp-scheduler-bot/build/index.js"
         ],
         "env": {
-          "OAUTH_CLIENT_ID": "0279efe9-00d2-4e9a-9b5c-a20142340095",
-          "OAUTH_CLIENT_SECRET":"FBUI1EH/OYeFt6d8+ruxwhd6a/8JJn/8eVc7ScA4YBA=",
+          "OAUTH_CLIENT_ID": "",
+          "OAUTH_CLIENT_SECRET":"",
           "OAUTH_AUTHORIZE_PATH":"/ehr/oauth2/auth",
           "OAUTH_AUTHORIZATION_METHOD": "requestbody",
           "OAUTH_TOKEN_PATH":"/ehr/oauth2/token",
