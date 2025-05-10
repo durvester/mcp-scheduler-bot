@@ -617,5 +617,621 @@ export const PRACTICE_FUSION_TOOLS = [
       },
       required: ["minimumStartDateTimeUtc", "maximumStartDateTimeUtc"]
     }
+  },
+  {
+    name: "get_event",
+    description: "Retrieve a single calendar event by its ID.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        eventId: {
+          type: "string",
+          description: "The unique identifier of the event to retrieve"
+        }
+      },
+      required: ["eventId"]
+    }
+  },
+  {
+    name: "get_events",
+    description: "Retrieve multiple calendar events by their IDs. This is more efficient than making multiple single-event requests.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        eventId: {
+          type: "array",
+          items: {
+            type: "string"
+          },
+          description: "Array of event IDs to retrieve"
+        }
+      },
+      required: ["eventId"]
+    }
+  },
+  {
+    name: "create_event",
+    description: "Create a new calendar event (appointment or blocked time).",
+    inputSchema: {
+      type: "object",
+      properties: {
+        practiceGuid: {
+          type: "string",
+          format: "uuid",
+          description: "The unique identifier of the practice where the event will be created"
+        },
+        ehrUserGuid: {
+          type: "string",
+          format: "uuid",
+          description: "The provider's unique identifier"
+        },
+        facilityGuid: {
+          type: "string",
+          format: "uuid",
+          description: "The facility's unique identifier"
+        },
+        patientPracticeGuid: {
+          type: "string",
+          format: "uuid",
+          description: "The patient's unique identifier (required for appointments)"
+        },
+        chiefComplaint: {
+          type: "string",
+          description: "The chief complaint or reason for the appointment"
+        },
+        eventType: {
+          type: "object",
+          properties: {
+            eventTypeGuid: {
+              type: "string",
+              format: "uuid",
+              description: "The unique identifier of the event type"
+            },
+            eventTypeName: {
+              type: "string",
+              description: "The name of the event type"
+            },
+            eventCategory: {
+              type: "string",
+              enum: ["Appointment", "BlockedTime"],
+              description: "The category of the event"
+            }
+          },
+          required: ["eventTypeGuid", "eventCategory"],
+          description: "The type of event to create"
+        },
+        startDateTimeUtc: {
+          type: "string",
+          format: "date-time",
+          description: "The start date and time of the event in UTC"
+        },
+        startDateTimeFlt: {
+          type: "string",
+          format: "date-time",
+          description: "The start date and time of the event in facility local time"
+        },
+        duration: {
+          type: "string",
+          description: "The duration of the event in time span format (e.g. '0:30:00' for 30 minutes). Must be between 1 minute and 12 hours for appointments."
+        },
+        appointmentConfirmation: {
+          type: "object",
+          properties: {
+            appointmentConfirmed: {
+              type: "boolean",
+              description: "Whether the appointment is confirmed"
+            },
+            confirmationMethodCode: {
+              type: "string",
+              description: "The method used to confirm the appointment"
+            },
+            notes: {
+              type: "string",
+              description: "Additional notes about the confirmation"
+            }
+          },
+          required: ["appointmentConfirmed"],
+          description: "Appointment confirmation details"
+        },
+        appointmentStatus: {
+          type: "object",
+          properties: {
+            statusName: {
+              type: "string",
+              description: "The status of the appointment (e.g., 'Pending', 'InLobby', 'InRoom')"
+            },
+            reasonForNoShowOrCancellation: {
+              type: "string",
+              description: "The reason if the appointment is cancelled or marked as no-show"
+            },
+            roomLocation: {
+              type: "string",
+              description: "The room location when status is 'InRoom'"
+            }
+          },
+          required: ["statusName"],
+          description: "Appointment status details"
+        }
+      },
+      required: ["practiceGuid", "eventType", "startDateTimeUtc", "startDateTimeFlt", "duration"]
+    }
+  },
+  {
+    name: "update_event",
+    description: "Update an existing calendar event (appointment or blocked time).",
+    inputSchema: {
+      type: "object",
+      properties: {
+        eventId: {
+          type: "string",
+          description: "The unique identifier of the event to update"
+        },
+        practiceGuid: {
+          type: "string",
+          format: "uuid",
+          description: "The unique identifier of the practice where the event exists"
+        },
+        ehrUserGuid: {
+          type: "string",
+          format: "uuid",
+          description: "The provider's unique identifier"
+        },
+        facilityGuid: {
+          type: "string",
+          format: "uuid",
+          description: "The facility's unique identifier"
+        },
+        patientPracticeGuid: {
+          type: "string",
+          format: "uuid",
+          description: "The patient's unique identifier (required for appointments)"
+        },
+        chiefComplaint: {
+          type: "string",
+          description: "The chief complaint or reason for the appointment"
+        },
+        eventType: {
+          type: "object",
+          properties: {
+            eventTypeGuid: {
+              type: "string",
+              format: "uuid",
+              description: "The unique identifier of the event type"
+            },
+            eventTypeName: {
+              type: "string",
+              description: "The name of the event type"
+            },
+            eventCategory: {
+              type: "string",
+              enum: ["Appointment", "BlockedTime"],
+              description: "The category of the event"
+            }
+          },
+          required: ["eventTypeGuid", "eventCategory"],
+          description: "The type of event"
+        },
+        startDateTimeUtc: {
+          type: "string",
+          format: "date-time",
+          description: "The start date and time of the event in UTC"
+        },
+        startDateTimeFlt: {
+          type: "string",
+          format: "date-time",
+          description: "The start date and time of the event in facility local time"
+        },
+        duration: {
+          type: "string",
+          description: "The duration of the event in time span format (e.g. '0:30:00' for 30 minutes). Must be between 1 minute and 12 hours for appointments."
+        },
+        appointmentConfirmation: {
+          type: "object",
+          properties: {
+            appointmentConfirmed: {
+              type: "boolean",
+              description: "Whether the appointment is confirmed"
+            },
+            confirmationMethodCode: {
+              type: "string",
+              description: "The method used to confirm the appointment"
+            },
+            notes: {
+              type: "string",
+              description: "Additional notes about the confirmation"
+            }
+          },
+          required: ["appointmentConfirmed"],
+          description: "Appointment confirmation details"
+        },
+        appointmentStatus: {
+          type: "object",
+          properties: {
+            statusName: {
+              type: "string",
+              description: "The status of the appointment (e.g., 'Pending', 'InLobby', 'InRoom')"
+            },
+            reasonForNoShowOrCancellation: {
+              type: "string",
+              description: "The reason if the appointment is cancelled or marked as no-show"
+            },
+            roomLocation: {
+              type: "string",
+              description: "The room location when status is 'InRoom'"
+            }
+          },
+          required: ["statusName"],
+          description: "Appointment status details"
+        }
+      },
+      required: ["eventId", "practiceGuid", "eventType", "startDateTimeUtc", "startDateTimeFlt", "duration"]
+    }
+  },
+  {
+    name: "find_payers",
+    description: "Search for payers in the Practice Fusion system based on optional filters.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        payerName: {
+          type: "string",
+          description: "Search for payers whose names begin with or include the specified name"
+        },
+        payerCode: {
+          type: "string",
+          description: "Search for payers with the exact specified payer code"
+        },
+        pageNumber: {
+          type: "integer",
+          description: "Page number to retrieve results for a specific page (1-200)",
+          default: 1
+        },
+        pageSize: {
+          type: "integer",
+          description: "Page size to retrieve specific number of records per page (1-100)",
+          default: 50
+        }
+      },
+      required: []
+    }
+  },
+  {
+    name: "get_payer",
+    description: "Retrieve a specific payer by its unique identifier.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        payerGuid: {
+          type: "string",
+          format: "uuid",
+          description: "The unique identifier of the payer to retrieve"
+        }
+      },
+      required: ["payerGuid"]
+    }
+  },
+  {
+    name: "get_payer_insurance_plans",
+    description: "Retrieve all insurance plans for a specific payer.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        payerGuid: {
+          type: "string",
+          format: "uuid",
+          description: "The unique identifier of the payer whose insurance plans to retrieve"
+        },
+        restrictToPracticePreferredList: {
+          type: "boolean",
+          description: "Whether to restrict the results to insurance plans that have been added to the practice's preferred list of plans",
+          default: false
+        }
+      },
+      required: ["payerGuid"]
+    }
+  },
+  {
+    name: "get_payer_insurance_plan",
+    description: "Retrieve a specific insurance plan from a payer.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        payerGuid: {
+          type: "string",
+          format: "uuid",
+          description: "The unique identifier of the payer"
+        },
+        planGuid: {
+          type: "string",
+          format: "uuid",
+          description: "The unique identifier of the insurance plan to retrieve"
+        }
+      },
+      required: ["payerGuid", "planGuid"]
+    }
+  },
+  {
+    name: "get_patient_insurance_plans",
+    description: "Retrieve insurance plans for a specific patient.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        patientPracticeGuid: {
+          type: "string",
+          format: "uuid",
+          description: "The unique identifier of the patient"
+        },
+        coverageType: {
+          type: "string",
+          description: "Filter by coverage type (e.g., 'Medical', 'Dental', 'Other')"
+        },
+        planType: {
+          type: "string",
+          description: "Filter by plan type (e.g., 'PPO', 'HMO', 'Medicare')"
+        },
+        orderOfBenefits: {
+          type: "string",
+          enum: ["Primary", "Secondary", "Tertiary", "Unknown/None"],
+          description: "Filter by order of benefits"
+        },
+        activeOnly: {
+          type: "boolean",
+          description: "Filter to retrieve only active insurance plans",
+          default: false
+        }
+      },
+      required: ["patientPracticeGuid"]
+    }
+  },
+  {
+    name: "get_patient_insurance_plan",
+    description: "Retrieve a specific insurance plan for a patient.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        patientPracticeGuid: {
+          type: "string",
+          format: "uuid",
+          description: "The unique identifier of the patient"
+        },
+        patientInsurancePlanGuid: {
+          type: "string",
+          format: "uuid",
+          description: "The unique identifier of the patient insurance plan to retrieve"
+        }
+      },
+      required: ["patientPracticeGuid", "patientInsurancePlanGuid"]
+    }
+  },
+  {
+    name: "create_patient_insurance_plan",
+    description: "Create a new insurance plan for a patient.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        patientPracticeGuid: {
+          type: "string",
+          format: "uuid",
+          description: "The unique identifier of the patient"
+        },
+        relationshipToInsured: {
+          type: "string",
+          enum: ["Self", "Spouse", "Child", "Other"],
+          description: "Relationship between the patient and the primary policyholder"
+        },
+        insuredId: {
+          type: "string",
+          description: "Unique identifier assigned to the patient by the insurance provider"
+        },
+        groupNumber: {
+          type: "string",
+          description: "Unique identifier to link patient to a specific coverage group"
+        },
+        orderOfBenefits: {
+          type: "string",
+          enum: ["Primary", "Secondary", "Tertiary", "Unknown/None"],
+          description: "Sequence in which multiple insurance plans pay claims"
+        },
+        coverageStartDate: {
+          type: "string",
+          format: "date-time",
+          description: "When the patient's health insurance policy becomes active (ISO 8601 format)"
+        },
+        coverageEndDate: {
+          type: "string",
+          format: "date-time",
+          description: "When the patient's health insurance policy expires (ISO 8601 format)"
+        },
+        nameOfEmployer: {
+          type: "string",
+          description: "Name of the organization providing health insurance coverage"
+        },
+        coPayType: {
+          type: "string",
+          enum: ["Fixed", "Percentage"],
+          description: "Type of copay (Fixed amount or Percentage)"
+        },
+        baseCopay: {
+          type: "number",
+          description: "Initial amount a patient must pay before insurance covers the remaining cost"
+        },
+        comments: {
+          type: "string",
+          description: "Additional notes about the insurance plan"
+        },
+        isActive: {
+          type: "boolean",
+          description: "Whether the insurance plan is active",
+          default: true
+        },
+        claimNumber: {
+          type: "string",
+          description: "Claim number for the insurance plan"
+        },
+        insurancePlan: {
+          type: "object",
+          properties: {
+            planGuid: {
+              type: "string",
+              format: "uuid",
+              description: "The unique identifier of the insurance plan"
+            },
+            payerGuid: {
+              type: "string",
+              format: "uuid",
+              description: "The unique identifier of the payer"
+            },
+            coverageType: {
+              type: "string",
+              description: "The type of coverage (e.g., 'Medical', 'Dental')"
+            },
+            planType: {
+              type: "string",
+              description: "The type of plan (e.g., 'PPO', 'HMO')"
+            }
+          },
+          required: ["planGuid", "payerGuid", "coverageType", "planType"]
+        },
+        employerContact: {
+          type: "object",
+          properties: {
+            firstName: {
+              type: "string",
+              description: "First name of the employer contact"
+            },
+            lastName: {
+              type: "string",
+              description: "Last name of the employer contact"
+            },
+            middleInitial: {
+              type: "string",
+              description: "Middle initial of the employer contact"
+            },
+            address: {
+              type: "object",
+              description: "Address of the employer contact",
+              properties: {
+                streetAddress1: {
+                  type: "string",
+                  description: "Street address line 1"
+                },
+                streetAddress2: {
+                  type: "string",
+                  description: "Street address line 2"
+                },
+                city: {
+                  type: "string",
+                  description: "City"
+                },
+                state: {
+                  type: "string",
+                  description: "Two-letter US state code"
+                },
+                postalCode: {
+                  type: "string",
+                  description: "US ZIP code"
+                }
+              }
+            },
+            phoneNumber: {
+              type: "string",
+              description: "Phone number of the employer contact"
+            },
+            phoneExtension: {
+              type: "string",
+              description: "Phone extension of the employer contact"
+            },
+            faxNumber: {
+              type: "string",
+              description: "Fax number of the employer contact"
+            },
+            faxExtension: {
+              type: "string",
+              description: "Fax extension of the employer contact"
+            },
+            emailAddress: {
+              type: "string",
+              description: "Email address of the employer contact"
+            }
+          },
+          required: ["firstName", "lastName"]
+        },
+        subscriber: {
+          type: "object",
+          properties: {
+            firstName: {
+              type: "string",
+              description: "First name of the subscriber"
+            },
+            lastName: {
+              type: "string",
+              description: "Last name of the subscriber"
+            },
+            middleInitial: {
+              type: "string",
+              description: "Middle initial of the subscriber"
+            },
+            socialSecurityNumber: {
+              type: "string",
+              description: "Social security number of the subscriber (format: XXX-XX-XXXX)"
+            },
+            birthDate: {
+              type: "string",
+              format: "date",
+              description: "Birth date of the subscriber (ISO 8601 format)"
+            },
+            sex: {
+              type: "string",
+              enum: ["Male", "Female", "Unknown"],
+              description: "Sex of the subscriber"
+            },
+            address: {
+              type: "object",
+              description: "Address of the subscriber",
+              properties: {
+                streetAddress1: {
+                  type: "string",
+                  description: "Street address line 1"
+                },
+                streetAddress2: {
+                  type: "string",
+                  description: "Street address line 2"
+                },
+                city: {
+                  type: "string",
+                  description: "City"
+                },
+                state: {
+                  type: "string",
+                  description: "Two-letter US state code"
+                },
+                postalCode: {
+                  type: "string",
+                  description: "US ZIP code"
+                }
+              }
+            },
+            primaryPhoneNumber: {
+              type: "string",
+              description: "Primary phone number of the subscriber"
+            },
+            primaryPhoneExtension: {
+              type: "string",
+              description: "Primary phone extension of the subscriber"
+            },
+            secondaryPhoneNumber: {
+              type: "string",
+              description: "Secondary phone number of the subscriber"
+            },
+            secondaryPhoneExtension: {
+              type: "string",
+              description: "Secondary phone extension of the subscriber"
+            }
+          },
+          required: ["firstName", "lastName", "sex"]
+        }
+      },
+      required: ["patientPracticeGuid", "relationshipToInsured", "insuredId", "orderOfBenefits", "coverageStartDate", "coPayType", "baseCopay", "insurancePlan"]
+    }
   }
 ]; 

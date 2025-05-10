@@ -4,6 +4,7 @@ import { UsersClient } from "../connectors/practicefusion/UsersClient.js";
 import { FacilitiesClient } from "../connectors/practicefusion/FacilitiesClient.js";
 import { PatientsClient } from "../connectors/practicefusion/PatientsClient.js";
 import { CalendarClient } from "../connectors/practicefusion/CalendarClient.js";
+import { PayerClient } from "../connectors/practicefusion/PayerClient.js";
 import { PRACTICE_FUSION_TOOLS } from "../constants/practicefusion-tools.js";
 // Define request schemas
 const listSchema = z.object({
@@ -24,6 +25,7 @@ export class ToolHandler {
     facilitiesClient;
     patientsClient;
     calendarClient;
+    payerClient;
     authConfig;
     baseUrl;
     constructor(authConfig, baseUrl) {
@@ -66,6 +68,12 @@ export class ToolHandler {
                 }
                 if (!this.calendarClient) {
                     this.calendarClient = new CalendarClient({
+                        baseUrl: this.baseUrl,
+                        auth: this.auth
+                    });
+                }
+                if (!this.payerClient) {
+                    this.payerClient = new PayerClient({
                         baseUrl: this.baseUrl,
                         auth: this.auth
                     });
@@ -218,6 +226,414 @@ export class ToolHandler {
                                     text: JSON.stringify(result, null, 2)
                                 }]
                         };
+                    case "get_event":
+                        const { eventId } = request.params?.arguments || {};
+                        if (!eventId) {
+                            return {
+                                content: [{
+                                        type: "text",
+                                        text: "eventId is required"
+                                    }]
+                            };
+                        }
+                        result = await this.calendarClient.getEvent(eventId);
+                        return {
+                            content: [{
+                                    type: "text",
+                                    text: JSON.stringify(result, null, 2)
+                                }]
+                        };
+                    case "get_events":
+                        const { eventId: eventIds } = request.params?.arguments || {};
+                        if (!eventIds || !Array.isArray(eventIds) || eventIds.length === 0) {
+                            return {
+                                content: [{
+                                        type: "text",
+                                        text: "eventId must be a non-empty array of event IDs"
+                                    }]
+                            };
+                        }
+                        result = await this.calendarClient.getEvents({ eventId: eventIds });
+                        return {
+                            content: [{
+                                    type: "text",
+                                    text: JSON.stringify(result, null, 2)
+                                }]
+                        };
+                    case "create_event":
+                        const eventData = request.params?.arguments;
+                        if (!eventData) {
+                            return {
+                                content: [{
+                                        type: "text",
+                                        text: "Event data is required"
+                                    }]
+                            };
+                        }
+                        // Validate required fields
+                        if (!eventData.practiceGuid || !eventData.eventType ||
+                            !eventData.startDateTimeUtc || !eventData.startDateTimeFlt ||
+                            !eventData.duration) {
+                            return {
+                                content: [{
+                                        type: "text",
+                                        text: "Missing required fields: practiceGuid, eventType, startDateTimeUtc, startDateTimeFlt, and/or duration"
+                                    }]
+                            };
+                        }
+                        // Additional validation for eventType
+                        if (!eventData.eventType.eventTypeGuid || !eventData.eventType.eventCategory) {
+                            return {
+                                content: [{
+                                        type: "text",
+                                        text: "eventType must include eventTypeGuid and eventCategory"
+                                    }]
+                            };
+                        }
+                        result = await this.calendarClient.createEvent(eventData);
+                        return {
+                            content: [{
+                                    type: "text",
+                                    text: JSON.stringify(result, null, 2)
+                                }]
+                        };
+                    case "update_event":
+                        const { eventId: updateEventId, ...updateEventData } = request.params?.arguments || {};
+                        if (!updateEventId) {
+                            return {
+                                content: [{
+                                        type: "text",
+                                        text: "eventId is required"
+                                    }]
+                            };
+                        }
+                        if (!updateEventData) {
+                            return {
+                                content: [{
+                                        type: "text",
+                                        text: "Event data is required"
+                                    }]
+                            };
+                        }
+                        // Validate required fields for update
+                        if (!updateEventData.practiceGuid || !updateEventData.eventType ||
+                            !updateEventData.startDateTimeUtc || !updateEventData.startDateTimeFlt ||
+                            !updateEventData.duration) {
+                            return {
+                                content: [{
+                                        type: "text",
+                                        text: "Missing required fields: practiceGuid, eventType, startDateTimeUtc, startDateTimeFlt, and/or duration"
+                                    }]
+                            };
+                        }
+                        // Additional validation for eventType
+                        if (!updateEventData.eventType.eventTypeGuid || !updateEventData.eventType.eventCategory) {
+                            return {
+                                content: [{
+                                        type: "text",
+                                        text: "eventType must include eventTypeGuid and eventCategory"
+                                    }]
+                            };
+                        }
+                        // Clean up optional fields if they're empty
+                        const cleanedEventData = {
+                            practiceGuid: updateEventData.practiceGuid,
+                            eventType: updateEventData.eventType,
+                            startDateTimeUtc: updateEventData.startDateTimeUtc,
+                            startDateTimeFlt: updateEventData.startDateTimeFlt,
+                            duration: updateEventData.duration,
+                            ...(updateEventData.ehrUserGuid && { ehrUserGuid: updateEventData.ehrUserGuid }),
+                            ...(updateEventData.facilityGuid && { facilityGuid: updateEventData.facilityGuid }),
+                            ...(updateEventData.patientPracticeGuid && { patientPracticeGuid: updateEventData.patientPracticeGuid }),
+                            ...(updateEventData.chiefComplaint && { chiefComplaint: updateEventData.chiefComplaint }),
+                            ...(updateEventData.appointmentConfirmation && Object.keys(updateEventData.appointmentConfirmation).length > 0 && { appointmentConfirmation: updateEventData.appointmentConfirmation }),
+                            ...(updateEventData.appointmentStatus && Object.keys(updateEventData.appointmentStatus).length > 0 && { appointmentStatus: updateEventData.appointmentStatus })
+                        };
+                        result = await this.calendarClient.updateEvent(updateEventId, cleanedEventData);
+                        return {
+                            content: [{
+                                    type: "text",
+                                    text: JSON.stringify(result, null, 2)
+                                }]
+                        };
+                    case "find_payers":
+                        const payerSearchParams = (request.params?.arguments || {});
+                        result = await this.payerClient.findPayers(payerSearchParams);
+                        return {
+                            content: [{
+                                    type: "text",
+                                    text: JSON.stringify(result, null, 2)
+                                }]
+                        };
+                    case "get_payer":
+                        const { payerGuid } = request.params?.arguments || {};
+                        if (!payerGuid) {
+                            return {
+                                content: [{
+                                        type: "text",
+                                        text: "Payer GUID is required"
+                                    }]
+                            };
+                        }
+                        try {
+                            const payerResult = await this.payerClient.getPayer(payerGuid);
+                            // Ensure we have a properly formatted response
+                            if (!payerResult) {
+                                return {
+                                    content: [{
+                                            type: "text",
+                                            text: "No payer found with the specified GUID"
+                                        }]
+                                };
+                            }
+                            // Make sure the response exactly matches the expected format
+                            const responseText = JSON.stringify(payerResult, null, 2);
+                            console.log("Payer API response:", responseText);
+                            return {
+                                content: [{
+                                        type: "text",
+                                        text: responseText
+                                    }]
+                            };
+                        }
+                        catch (error) {
+                            console.error(`Error in get_payer handler:`, error);
+                            return {
+                                content: [{
+                                        type: "text",
+                                        text: `Error fetching payer: ${error.message || "Unknown error"}`
+                                    }]
+                            };
+                        }
+                    case "get_payer_insurance_plans":
+                        const { payerGuid: insurancePayerGuid, restrictToPracticePreferredList } = request.params?.arguments || {};
+                        if (!insurancePayerGuid) {
+                            return {
+                                content: [{
+                                        type: "text",
+                                        text: "Payer GUID is required"
+                                    }]
+                            };
+                        }
+                        try {
+                            const plansResult = await this.payerClient.getInsurancePlans(insurancePayerGuid, {
+                                restrictToPracticePreferredList: restrictToPracticePreferredList === true
+                            });
+                            return {
+                                content: [{
+                                        type: "text",
+                                        text: JSON.stringify(plansResult || { insurancePlans: [] }, null, 2)
+                                    }]
+                            };
+                        }
+                        catch (error) {
+                            console.error(`Error in get_payer_insurance_plans handler:`, error);
+                            return {
+                                content: [{
+                                        type: "text",
+                                        text: `Error fetching insurance plans: ${error.message || "Unknown error"}`
+                                    }]
+                            };
+                        }
+                    case "get_payer_insurance_plan":
+                        const { payerGuid: planPayerGuid, planGuid } = request.params?.arguments || {};
+                        if (!planPayerGuid) {
+                            return {
+                                content: [{
+                                        type: "text",
+                                        text: "Payer GUID is required"
+                                    }]
+                            };
+                        }
+                        if (!planGuid) {
+                            return {
+                                content: [{
+                                        type: "text",
+                                        text: "Plan GUID is required"
+                                    }]
+                            };
+                        }
+                        try {
+                            const planResult = await this.payerClient.getInsurancePlan(planPayerGuid, planGuid);
+                            if (!planResult) {
+                                return {
+                                    content: [{
+                                            type: "text",
+                                            text: "No insurance plan found with the specified GUIDs"
+                                        }]
+                                };
+                            }
+                            return {
+                                content: [{
+                                        type: "text",
+                                        text: JSON.stringify(planResult, null, 2)
+                                    }]
+                            };
+                        }
+                        catch (error) {
+                            console.error(`Error in get_payer_insurance_plan handler:`, error);
+                            return {
+                                content: [{
+                                        type: "text",
+                                        text: `Error fetching insurance plan: ${error.message || "Unknown error"}`
+                                    }]
+                            };
+                        }
+                    case "get_patient_insurance_plans":
+                        const { patientPracticeGuid: insurancePlanPatientGuid, coverageType, planType, orderOfBenefits, activeOnly } = request.params?.arguments || {};
+                        if (!insurancePlanPatientGuid) {
+                            return {
+                                content: [{
+                                        type: "text",
+                                        text: "Patient Practice GUID is required"
+                                    }]
+                            };
+                        }
+                        try {
+                            const patientPlansResult = await this.payerClient.getPatientInsurancePlans(insurancePlanPatientGuid, {
+                                coverageType,
+                                planType,
+                                orderOfBenefits,
+                                activeOnly
+                            });
+                            return {
+                                content: [{
+                                        type: "text",
+                                        text: JSON.stringify(patientPlansResult || { patientInsurancePlans: [] }, null, 2)
+                                    }]
+                            };
+                        }
+                        catch (error) {
+                            console.error(`Error in get_patient_insurance_plans handler:`, error);
+                            return {
+                                content: [{
+                                        type: "text",
+                                        text: `Error fetching patient insurance plans: ${error.message || "Unknown error"}`
+                                    }]
+                            };
+                        }
+                    case "get_patient_insurance_plan":
+                        const { patientPracticeGuid: specificPatientGuid, patientInsurancePlanGuid } = request.params?.arguments || {};
+                        if (!specificPatientGuid) {
+                            return {
+                                content: [{
+                                        type: "text",
+                                        text: "Patient Practice GUID is required"
+                                    }]
+                            };
+                        }
+                        if (!patientInsurancePlanGuid) {
+                            return {
+                                content: [{
+                                        type: "text",
+                                        text: "Patient Insurance Plan GUID is required"
+                                    }]
+                            };
+                        }
+                        try {
+                            const patientPlanResult = await this.payerClient.getPatientInsurancePlan(specificPatientGuid, patientInsurancePlanGuid);
+                            if (!patientPlanResult) {
+                                return {
+                                    content: [{
+                                            type: "text",
+                                            text: "No patient insurance plan found with the specified GUIDs"
+                                        }]
+                                };
+                            }
+                            return {
+                                content: [{
+                                        type: "text",
+                                        text: JSON.stringify(patientPlanResult, null, 2)
+                                    }]
+                            };
+                        }
+                        catch (error) {
+                            console.error(`Error in get_patient_insurance_plan handler:`, error);
+                            return {
+                                content: [{
+                                        type: "text",
+                                        text: `Error fetching patient insurance plan: ${error.message || "Unknown error"}`
+                                    }]
+                            };
+                        }
+                    case "create_patient_insurance_plan":
+                        const { patientPracticeGuid: newPlanPatientGuid, ...insurancePlanData } = request.params?.arguments || {};
+                        if (!newPlanPatientGuid) {
+                            return {
+                                content: [{
+                                        type: "text",
+                                        text: "Patient Practice GUID is required"
+                                    }]
+                            };
+                        }
+                        if (!insurancePlanData || Object.keys(insurancePlanData).length === 0) {
+                            return {
+                                content: [{
+                                        type: "text",
+                                        text: "Insurance plan data is required"
+                                    }]
+                            };
+                        }
+                        // Basic validation for required fields
+                        const requiredFields = ['relationshipToInsured', 'insuredId', 'orderOfBenefits',
+                            'coverageStartDate', 'coPayType', 'baseCopay', 'insurancePlan'];
+                        const missingFields = requiredFields.filter(field => !insurancePlanData[field]);
+                        if (missingFields.length > 0) {
+                            return {
+                                content: [{
+                                        type: "text",
+                                        text: `Missing required fields: ${missingFields.join(', ')}`
+                                    }]
+                            };
+                        }
+                        // Additional validation for insurance plan
+                        if (!insurancePlanData.insurancePlan?.planGuid ||
+                            !insurancePlanData.insurancePlan?.payerGuid ||
+                            !insurancePlanData.insurancePlan?.coverageType ||
+                            !insurancePlanData.insurancePlan?.planType) {
+                            return {
+                                content: [{
+                                        type: "text",
+                                        text: "Insurance plan must include planGuid, payerGuid, coverageType, and planType"
+                                    }]
+                            };
+                        }
+                        try {
+                            // Cast the data to the correct type and include the patientPracticeGuid
+                            const fullPlanData = {
+                                patientPracticeGuid: newPlanPatientGuid,
+                                relationshipToInsured: insurancePlanData.relationshipToInsured,
+                                insuredId: insurancePlanData.insuredId,
+                                orderOfBenefits: insurancePlanData.orderOfBenefits,
+                                coverageStartDate: insurancePlanData.coverageStartDate,
+                                coPayType: insurancePlanData.coPayType,
+                                baseCopay: insurancePlanData.baseCopay,
+                                insurancePlan: insurancePlanData.insurancePlan,
+                                ...('groupNumber' in insurancePlanData && { groupNumber: insurancePlanData.groupNumber }),
+                                ...('coverageEndDate' in insurancePlanData && { coverageEndDate: insurancePlanData.coverageEndDate }),
+                                ...('nameOfEmployer' in insurancePlanData && { nameOfEmployer: insurancePlanData.nameOfEmployer }),
+                                ...('comments' in insurancePlanData && { comments: insurancePlanData.comments }),
+                                ...('isActive' in insurancePlanData && { isActive: insurancePlanData.isActive }),
+                                ...('claimNumber' in insurancePlanData && { claimNumber: insurancePlanData.claimNumber }),
+                                ...('employerContact' in insurancePlanData && { employerContact: insurancePlanData.employerContact }),
+                                ...('subscriber' in insurancePlanData && { subscriber: insurancePlanData.subscriber })
+                            };
+                            result = await this.payerClient.createPatientInsurancePlan(newPlanPatientGuid, fullPlanData);
+                            return {
+                                content: [{
+                                        type: "text",
+                                        text: JSON.stringify(result, null, 2)
+                                    }]
+                            };
+                        }
+                        catch (error) {
+                            return {
+                                content: [{
+                                        type: "text",
+                                        text: `Error creating patient insurance plan: ${error.message}`
+                                    }]
+                            };
+                        }
                     default:
                         throw new Error(`Unknown tool: ${request.params?.name}`);
                 }

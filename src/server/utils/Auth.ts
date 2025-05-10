@@ -173,8 +173,8 @@ export class Auth {
       try {
         const token = await this.exchangeCodeForToken(code as string);
         this.token = token;
-        await stateHandler.pendingOperation();
-        stateHandler.resolve(token);
+        const operationResult = await stateHandler.pendingOperation();
+        stateHandler.resolve(operationResult);
         res.send('Authentication successful! You can close this window.');
       } catch (error) {
         stateHandler.reject(error as Error);
