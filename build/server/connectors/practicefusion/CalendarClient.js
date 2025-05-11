@@ -65,9 +65,37 @@ export class CalendarClient extends PracticeFusionClient {
             throw error;
         }
     }
-    async updateEvent(eventId, event) {
+    async updateEvent(eventId, updatedFields) {
         try {
-            return await this.put(`/events/${eventId}`, { event });
+            // First, get the current event
+            const currentEventResponse = await this.getEvent(eventId);
+            const currentEvent = currentEventResponse.event;
+            // Apply updates to the event object while preserving the exact structure
+            const updatedEvent = {
+                ...currentEvent,
+                ...updatedFields
+            };
+            // Handle nested objects
+            if (updatedFields.appointmentConfirmation) {
+                updatedEvent.appointmentConfirmation = {
+                    ...currentEvent.appointmentConfirmation,
+                    ...updatedFields.appointmentConfirmation
+                };
+            }
+            if (updatedFields.appointmentStatus) {
+                updatedEvent.appointmentStatus = {
+                    ...currentEvent.appointmentStatus,
+                    ...updatedFields.appointmentStatus
+                };
+            }
+            if (updatedFields.eventType) {
+                updatedEvent.eventType = {
+                    ...currentEvent.eventType,
+                    ...updatedFields.eventType
+                };
+            }
+            // Send the complete event object to the API
+            return await this.put(`/events/${eventId}`, { event: updatedEvent });
         }
         catch (error) {
             console.error('Error updating event:', error);

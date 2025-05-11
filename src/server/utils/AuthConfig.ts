@@ -15,4 +15,5 @@ export interface Token {
     access_token: string;
     refresh_token: string;
     expires_at: Date;
+    pf_practice_guid?: string;
 }
