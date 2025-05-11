@@ -1,9 +1,9 @@
 # Practice Fusion MCP Server
 
-A Model Context Protocol (MCP) server that provides healthcare tools and prompts for interacting with Practice Fusion EMR data using Claude Desktop and Goose Desktop.
+A Model Context Protocol (MCP) server that provides healthcare tools and prompts for interacting with Practice Fusion using any MCP Client.
 
 ## Features
-- Practice Fusion EMR integration using API endpoints
+- Practice Fusion tools via API
 - Uses OAuth2 to authenticate with Practice Fusion
 - Anthropic Claude Desktop integration
 - Response caching
@@ -31,20 +31,17 @@ PF_CLIENT_ID=your_client_id
 PF_CLIENT_SECRET=your_client_secret
 
 # API URLs
-PF_API_URL=https://qa-api.practicefusion.com
+PF_API_URL=https://api.practicefusion.com
 
 # OAuth settings
 PF_TOKEN_PATH=/ehr/oauth2/token
 PF_AUTHORIZE_PATH=/ehr/oauth2/auth
-PF_CALLBACK_URL=http://localhost:3456/oauth/callback
-PF_CALLBACK_PORT=3456
+PF_CALLBACK_URL={{your redirect uri}}
+
 
 # Practice Fusion API scopes
 PF_SCOPES=calendar:a_confirmation_v1 calendar:a_events_v1 calendar:a_events_v2 ... etc
 
-# Optional: Practice GUID
-PF_PRACTICE_GUID=your_practice_guid
-```
 
 ## Start MCP Server Locally 
 ```
@@ -83,7 +80,7 @@ macOS: ~/Library/Application Support/Claude/claude_desktop_config.json
 }
 ```
 
-Notice that you no longer need to include sensitive credentials in the Claude Desktop configuration. All credentials are stored and loaded from the `.env` file on the server.
+Just so you know, you no longer need to include sensitive credentials in the Claude Desktop configuration. All credentials are stored and loaded from the `.env` file on the server.
 
 ## Use MCP Inspector
 (MCP Server using inspector. Make sure to update the .env file with the correct values.)
