@@ -1,124 +1,55 @@
-# Agent Care: An MCP Server for EMRs like Cerner and Epic
+# Practice Fusion MCP Server
 
-A Model Context Protocol (MCP) server that provides healthcare tools and prompts for interacting with FHIR data and medical resources on EMRs like Cerner and Epic using Claude Desktop and Goose Desktop.
-
-[![smithery badge](https://smithery.ai/badge/@Kartha-AI/agentcare-mcp)](https://smithery.ai/server/@Kartha-AI/agentcare-mcp)
-
-## Demo
-[![Demo](screenshots/demo.png)](https://www.agentcare.ai/demo.mp4)
+A Model Context Protocol (MCP) server that provides healthcare tools and prompts for interacting with Practice Fusion EMR data using Claude Desktop and Goose Desktop.
 
 ## Features
-- EMR integrartion using SMART on FHIR APIs
-- Uses OAuth2 to authenticate with EMRs 
+- Practice Fusion EMR integration using API endpoints
+- Uses OAuth2 to authenticate with Practice Fusion
 - Anthropic Claude Desktop integration
-- Medical research integration (PubMed, Clinical Trials, FDA)
 - Response caching
 - Error handling
 - Null-safe data formatting
 - Comprehensive clinical analysis
 
-## Screenshots
-
-<img src="screenshots/cerner.png" alt="Cerner" width="700">
-<img src="screenshots/epic.png" alt="Epic" width="700">
-<img src="screenshots/converse.png" alt="Converse" width="700">
-<img src="screenshots/soap.png" alt="Soap Notes" width="700">
-<img src="screenshots/timeline.png" alt="Timeline" width="700">
-
 ## Tools
 
-### FHIR Tools
-- `find_patient` - Search for a patient by name, DOB, or other identifiers
-- `get_patient_observations` - Retrieve patient observations/vital signs
-- `get_patient_conditions` - Get patient's active conditions
-- `get_patient_medications` - Get patient's current medications
-- `get_patient_encounters` - Get patient's clinical encounters
-- `get_patient_allergies` - Get patient's allergies and intolerances
-- `get_patient_procedures` - Get patient's procedures
-- `get_patient_careteam` - Get patient's care team members
-- `get_patient_careplans` - Get patient's active care plans
-- `get_vital_signs` - Get patient's vital signs
-- `get_lab_results` - Get patient's laboratory results
-- `get_medications_history` - Get patient's medication history
-- `clinical_query` - Execute custom FHIR queries
-
-### Medical Research Tools
-- `search-pubmed` - Search PubMed articles related to medical conditions
-- `search-trials` - Find relevant clinical trials
-- `drug-interactions` - Check drug-drug interactions
-
-## Usage
-
-Each tool  requires specific parameters:
-
-### Required Parameters
-- Most tools require `patientId`
-- Some tools have additional parameters:
-  - `lab_trend_analysis`: requires `labType`
-  - `search-pubmed`: requires `query` and optional `maxResults`
-  - `search-trials`: requires `condition` and optional `location`
-  - `drug-interactions`: requires `drugs` array
+### Practice Fusion API Tools
+- `get_users` - Get all users in the Practice Fusion practice
+- `get_facilities` - Get all facilities in the Practice Fusion practice
+- `search_patients` - Search for patients by name, DOB, or other identifiers
+- `get_patient_v4` - Get patient details using the v4 API
+- `create_patient_v4` - Create a new patient in Practice Fusion
+- `update_patient_v4` - Update an existing patient in Practice Fusion
+- And many more Practice Fusion API operations
 
 ## Development Configuration 
-- To use with Cerener: Go to https://code-console.cerner.com and create a sandbox account, create a new provider app and get the clientId/secret.
-(note: ec2458f2-1e24-41c8-b71b-0e701af7583d below is the tenant id for cerner developer sandbox)
+For local testing, create a `.env` file in the root directory or use these environment variables in claude desktop launch configuration.
 
-- To use with Epic: Go to https://fhir.epic.com/Developer/Apps , sign up as developer and create a new app and get the clientId/secret.
-
-- For PubMed, Clinical Trials and FDA, you need to get the API keys from the respective websites.
-  - https://clinicaltrials.gov/api/v2/studies
-  - https://eutils.ncbi.nlm.nih.gov/entrez/eutils
-  - https://api.fda.gov/drug/ndc.json
-
-For local testing Create a `.env` file in the root directory or use these environment variables in claude desktop launch configuration.
-#### Cerner
-````
-OAUTH_CLIENT_ID="XXXXX",
-OAUTH_CLIENT_SECRET="XXXXXXX",
-OAUTH_TOKEN_HOST="https://authorization.cerner.com", 
-OAUTH_AUTHORIZE_PATH="/tenants/ec2458f2-1e24-41c8-b71b-0e701af7583d/protocols/oauth2/profiles/smart-v1/personas/provider/authorize",
-OAUTH_AUTHORIZATION_METHOD='header',
-OAUTH_TOKEN_PATH="/tenants/ec2458f2-1e24-41c8-b71b-0e701af7583d/hosts/api.cernermillennium.com/protocols/oauth2/profiles/smart-v1/token",
-OAUTH_AUDIENCE="https://fhir-ehr.cerner.com/r4/ec2458f2-1e24-41c8-b71b-0e701af7583d",
+```
+OAUTH_CLIENT_ID="your_client_id",
+OAUTH_CLIENT_SECRET="your_client_secret",
+OAUTH_TOKEN_HOST="https://qa-api.practicefusion.com", 
+OAUTH_AUTHORIZE_PATH="/ehr/oauth2/auth",
+OAUTH_AUTHORIZATION_METHOD="requestbody",
+OAUTH_TOKEN_PATH="/ehr/oauth2/token",
+OAUTH_AUDIENCE="",
 OAUTH_CALLBACK_URL="http://localhost:3456/oauth/callback",
-OAUTH_SCOPES="user/Patient.read user/Condition.read user/Observation.read user/MedicationRequest.read user/AllergyIntolerance.read user/Procedure.read user/CarePlan.read user/CareTeam.read user/Encounter.read user/Immunization.read",
+OAUTH_SCOPES="calendar:a_confirmation_v1 calendar:a_events_v1 calendar:a_events_v2 calendar:a_notes_v1 calendar:a_status_v1 calendar:d_events_v1 calendar:r_events_v1 calendar:r_events_v2 calendar:r_eventtypes_v1 calendar:r_notes_v1 chart:a_superbill_v2 chart:a_vxu_v2 document:a_document_v2 document:r_document_types_v2 document:r_document_v2 document:z_document_v2 encounter:a_diagnosis_v1 encounter:a_notes_v1 encounter:r_metadata_v1 encounter:r_summary_v1 me:r_erx_v2 me:r_login_v2 me:r_profile_v2 patient:a_contact_v4 patient:a_demographics_v1 patient:a_guarantor_v1 patient:a_insurance_plan_v1 patient:a_preferredPharmacy_v1 patient:a_relatedPerson_v1 patient:r_ccda_allergies_v2 patient:r_ccda_assessmentAndPlan_v2 patient:r_ccda_clinicalNotes_v2 patient:r_ccda_demographics_v2 patient:r_ccda_encounters_v2 patient:r_ccda_functionalStatus_v2 patient:r_ccda_goals_v2 patient:r_ccda_healthConcerns_v2 patient:r_ccda_immunizations_v2 patient:r_ccda_medicalEquipment_v2 patient:r_ccda_medications_v2 patient:r_ccda_mentalStatus_v2 patient:r_ccda_problems_v2 patient:r_ccda_procedures_v2 patient:r_ccda_reasonForReferral_v2 patient:r_ccda_results_v2 patient:r_ccda_socialHistory_v2 patient:r_ccda_vitalSigns_v2 patient:r_contact_v4 patient:r_demographics_v2 patient:r_diagnosis_v1 patient:r_guarantor_v1 patient:r_insurance_v3 patient:r_insurance_plan_v1 patient:r_preferredPharmacy_v1 patient:r_profile_v4 patient:r_relatedPerson_v1 patient:r_search_v2 payer:r_insurance_v1 payer:r_insurance_plan_v1 practice:r_facilities_v2 user:r_login_v2 user:r_profile_v2",
 OAUTH_CALLBACK_PORT="3456"
-FHIR_BASE_URL:any = "https://fhir-ehr.cerner.com/r4/ec2458f2-1e24-41c8-b71b-0e701af7583d" 
-PUBMED_API_KEY=your_pubmed_api_key
-CLINICAL_TRIALS_API_KEY=your_trials_api_key
-FDA_API_KEY=your_fda_api_key
-````
-#### Epic
-````
-OAUTH_CLIENT_ID="XXXXXXX",
-OAUTH_CLIENT_SECRET="",
-OAUTH_TOKEN_HOST="https://fhir.epic.com",
-OAUTH_AUTHORIZE_PATH="/interconnect-fhir-oauth/oauth2/authorize",
-OAUTH_AUTHORIZATION_METHOD='body',
-OAUTH_TOKEN_PATH="/interconnect-fhir-oauth/oauth2/token",
-OAUTH_AUDIENCE="https://fhir.epic.com/interconnect-fhir-oauth/api/FHIR/R4",
-OAUTH_CALLBACK_URL="http://localhost:3456/oauth/callback",
-OAUTH_SCOPES="user/Patient.read user/Observation.read user/MedicationRequest.read user/Condition.read user/AllergyIntolerance.read user/Procedure.read user/CarePlan.read user/CareTeam.read user/Encounter.read user/Immunization.read",
-OAUTH_CALLBACK_PORT=3456
-FHIR_BASE_URL:any = "https://fhir.epic.com/interconnect-fhir-oauth/api/FHIR/R4" //EPIC  
-PUBMED_API_KEY=your_pubmed_api_key
-CLINICAL_TRIALS_API_KEY=your_trials_api_key
-FDA_API_KEY=your_fda_api_key
-````
+```
 
 ## Start MCP Server Locally 
-````
-git clone {agentcare-mcp-github path}
-cd agentcare-mcp
+```
+git clone {practice-fusion-mcp-github path}
+cd practice-fusion-mcp
 npm install
 npm run build
-````
+```
 
-## Use claude desktop
-````
-for claude desktop: 
+## Use with Claude Desktop
+```
+For Claude Desktop, update your configuration:
 macOS: ~/Library/Application Support/Claude/claude_desktop_config.json
-(use the env variables as shown above)
 
 {
   "mcpServers": {
@@ -130,59 +61,38 @@ macOS: ~/Library/Application Support/Claude/claude_desktop_config.json
         "/Users/your-username/Desktop"
       ]
     },
-    "agent-care": {
+    "practice-fusion-mcp": {
       "command": "node",
       "args": [
-        "/Users/your-username/{agentcare-download-path}/agent-care-mcp/build/index.js"
+        "/Users/your-username/{download-path}/practice-fusion-mcp-server/build/index.js"
       ],
       "env": {
-        "OAUTH_CLIENT_ID": XXXXXX,
-        "OAUTH_CLIENT_SECRET":XXXXXXX,
-        "OAUTH_TOKEN_HOST":,
-        "OAUTH_TOKEN_PATH":,
-        "OAUTH_AUTHORIZE_PATH",
-        "OAUTH_AUTHORIZATION_METHOD": ,
-        "OAUTH_AUDIENCE":,
-        "OAUTH_CALLBACK_URL":,
-        "OAUTH_SCOPES":,
-        "OAUTH_CALLBACK_PORT":,
-        "FHIR_BASE_URL":,
-        "PUBMED_API_KEY":,
-        "CLINICAL_TRIALS_API_KEY":,
-        "FDA_API_KEY":
+        "OAUTH_CLIENT_ID": "your_client_id",
+        "OAUTH_CLIENT_SECRET": "your_client_secret",
+        "OAUTH_TOKEN_HOST": "https://qa-api.practicefusion.com",
+        "OAUTH_AUTHORIZE_PATH": "/ehr/oauth2/auth",
+        "OAUTH_AUTHORIZATION_METHOD": "requestbody",
+        "OAUTH_TOKEN_PATH": "/ehr/oauth2/token",
+        "OAUTH_AUDIENCE": "",
+        "OAUTH_CALLBACK_URL": "http://localhost:3456/oauth/callback",
+        "OAUTH_SCOPES": "calendar:a_confirmation_v1 calendar:a_events_v1 ... etc",
+        "OAUTH_CALLBACK_PORT": "3456"
       }
     }
   }
 }
-````
-## Use MCP Inspectopr
+```
+
+## Use MCP Inspector
 (MCP Server using inspector. Make sure to update the .env file with the correct values.)
-````
+```
 npm install -g @modelcontextprotocol/inspector
-mcp-inspector  build/index.js
+mcp-inspector build/index.js
 http://localhost:5173
-
-````
-
-## Test User Logins
-(commonly used for sandbox/dev)
-- Cerner: portal | portal 
-- Epic: FHIRTWO | EpicFhir11! 
+```
 
 ## Troubleshooting:
 If Claude desktop is running it uses port 3456 for Auth. You need to terminate that process using the following command:
-````
+```
 kill -9 $(lsof -t -i:3456)
-````
-
-## Use Goose
-Goose is an open Source AI Agent frameowrk from Block(Stripe) that works with MCP servers. Goose Desktop is like Claude Desktop that can work with MCP servers. But Goose can be configured to use models other than Anthropic as well. More info: https://block.xyz/inside/block-open-source-introduces-codename-goose
-
-See below how Goose Desktop works with Agent Care:
-(goose extension will be configured with command: 
-/Users/your-username/{agentcare-download-path}/agent-care-mcp/build/index.js)
-
-<img src="screenshots/goose-extension.png" alt="Cerner">
-<img src="screenshots/goose-env.png" alt="Epic">
-<img src="screenshots/goose-model.png" alt="Converse" >
-<img src="screenshots/goose-in-action.png" alt="Soap Notes">
+```
