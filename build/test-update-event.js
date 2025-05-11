@@ -1,30 +1,27 @@
 import { Auth } from './server/utils/Auth.js';
-import { readFileSync } from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { CalendarClient } from './server/connectors/practicefusion/CalendarClient.js';
+import dotenv from 'dotenv';
+// Load environment variables
+dotenv.config();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 async function testUpdateEvent() {
     let auth;
     let testEventId;
-    let config;
     try {
-        // Read config
-        const configPath = path.join(__dirname, '..', 'config', 'claude_desktop_config_practicefusion.json');
-        const configFile = JSON.parse(readFileSync(configPath, 'utf8'));
-        config = configFile.mcpServers['practice-fusion-mcp'].env;
-        // Initialize auth
+        // Initialize auth from environment variables
         auth = new Auth({
-            clientId: config.OAUTH_CLIENT_ID,
-            clientSecret: config.OAUTH_CLIENT_SECRET,
-            tokenHost: config.BASE_URL,
-            tokenPath: config.OAUTH_TOKEN_PATH,
-            authorizePath: config.OAUTH_AUTHORIZE_PATH,
+            clientId: process.env.PF_CLIENT_ID || "",
+            clientSecret: process.env.PF_CLIENT_SECRET || "",
+            tokenHost: process.env.PF_API_URL || "https://qa-api.practicefusion.com",
+            tokenPath: process.env.PF_TOKEN_PATH || "/ehr/oauth2/token",
+            authorizePath: process.env.PF_AUTHORIZE_PATH || "/ehr/oauth2/auth",
             authorizationMethod: 'requestbody',
-            callbackURL: config.OAUTH_CALLBACK_URL,
-            callbackPort: parseInt(config.OAUTH_CALLBACK_PORT),
-            scopes: config.OAUTH_SCOPES,
+            callbackURL: process.env.PF_CALLBACK_URL || "http://localhost:3456/oauth/callback",
+            callbackPort: parseInt(process.env.PF_CALLBACK_PORT || "3456"),
+            scopes: process.env.PF_SCOPES || "",
             audience: '' // Practice Fusion doesn't use audience
         });
         // Get initial token
@@ -34,7 +31,7 @@ async function testUpdateEvent() {
         });
         // Initialize calendar client
         const calendarClient = new CalendarClient({
-            baseUrl: config.BASE_URL,
+            baseUrl: process.env.PF_API_URL || "https://qa-api.practicefusion.com",
             auth: auth
         });
         // Get event types
@@ -52,7 +49,7 @@ async function testUpdateEvent() {
         const startTime = new Date(now.getTime() + 24 * 60 * 60 * 1000); // Tomorrow
         const endTime = new Date(startTime.getTime() + 30 * 60 * 1000); // 30 minutes later
         const createEventRequest = {
-            practiceGuid: config.PRACTICE_GUID,
+            practiceGuid: process.env.PF_PRACTICE_GUID || "",
             eventType: {
                 eventTypeGuid: appointmentType.eventTypeGuid,
                 eventTypeName: appointmentType.eventTypeName,
@@ -69,7 +66,7 @@ async function testUpdateEvent() {
         // Update the event
         console.log('\nUpdating event...');
         const updateEventRequest = {
-            practiceGuid: config.PRACTICE_GUID,
+            practiceGuid: process.env.PF_PRACTICE_GUID || "",
             eventType: {
                 eventTypeGuid: appointmentType.eventTypeGuid,
                 eventTypeName: appointmentType.eventTypeName,
