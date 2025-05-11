@@ -106,7 +106,8 @@ export class Auth {
         return {
             access_token: response.data.access_token,
             refresh_token: response.data.refresh_token,
-            expires_at: expiresAt
+            expires_at: expiresAt,
+            pf_practice_guid: response.data.pf_practice_guid
         };
     } catch (error: any) {
         throw new Error(`Error getting token: ${error.message} . URL: ${tokenUrl}`);
@@ -145,7 +146,8 @@ export class Auth {
       this.token = {
         access_token: response.data.access_token,
         refresh_token: response.data.refresh_token,
-        expires_at: expiresAt
+        expires_at: expiresAt,
+        pf_practice_guid: response.data.pf_practice_guid
       };
     } catch (error: any) {
       this.token = null;
@@ -253,6 +255,10 @@ export class Auth {
       }
       this.callbackServer = null;
     }
+  }
+
+  public getPracticeGuid(): string | undefined {
+    return this.token?.pf_practice_guid;
   }
 }
 

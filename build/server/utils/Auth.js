@@ -80,7 +80,8 @@ export class Auth {
             return {
                 access_token: response.data.access_token,
                 refresh_token: response.data.refresh_token,
-                expires_at: expiresAt
+                expires_at: expiresAt,
+                pf_practice_guid: response.data.pf_practice_guid
             };
         }
         catch (error) {
@@ -109,7 +110,8 @@ export class Auth {
             this.token = {
                 access_token: response.data.access_token,
                 refresh_token: response.data.refresh_token,
-                expires_at: expiresAt
+                expires_at: expiresAt,
+                pf_practice_guid: response.data.pf_practice_guid
             };
         }
         catch (error) {
@@ -210,6 +212,9 @@ export class Auth {
             }
             this.callbackServer = null;
         }
+    }
+    getPracticeGuid() {
+        return this.token?.pf_practice_guid;
     }
 }
 export default Auth;

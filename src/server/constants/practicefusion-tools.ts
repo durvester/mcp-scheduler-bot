@@ -758,37 +758,37 @@ export const PRACTICE_FUSION_TOOLS = [
   },
   {
     name: "update_event",
-    description: "Update an existing calendar event (appointment or blocked time).",
+    description: "Update an existing calendar event (appointment or blocked time). You only need to provide the fields you want to update - the implementation will fetch the current event and merge your changes.",
     inputSchema: {
       type: "object",
       properties: {
         eventId: {
           type: "string",
-          description: "The unique identifier of the event to update"
+          description: "The unique identifier of the event to update (required)"
         },
         practiceGuid: {
           type: "string",
           format: "uuid",
-          description: "The unique identifier of the practice where the event exists"
+          description: "The unique identifier of the practice where the event exists (optional)"
         },
         ehrUserGuid: {
           type: "string",
           format: "uuid",
-          description: "The provider's unique identifier"
+          description: "The provider's unique identifier (optional)"
         },
         facilityGuid: {
           type: "string",
           format: "uuid",
-          description: "The facility's unique identifier"
+          description: "The facility's unique identifier (optional)"
         },
         patientPracticeGuid: {
           type: "string",
           format: "uuid",
-          description: "The patient's unique identifier (required for appointments)"
+          description: "The patient's unique identifier (optional)"
         },
         chiefComplaint: {
           type: "string",
-          description: "The chief complaint or reason for the appointment"
+          description: "The chief complaint or reason for the appointment (optional)"
         },
         eventType: {
           type: "object",
@@ -809,21 +809,21 @@ export const PRACTICE_FUSION_TOOLS = [
             }
           },
           required: ["eventTypeGuid", "eventCategory"],
-          description: "The type of event"
+          description: "The type of event (optional, but if provided must include eventTypeGuid and eventCategory)"
         },
         startDateTimeUtc: {
           type: "string",
           format: "date-time",
-          description: "The start date and time of the event in UTC"
+          description: "The start date and time of the event in UTC (optional)"
         },
         startDateTimeFlt: {
           type: "string",
           format: "date-time",
-          description: "The start date and time of the event in facility local time"
+          description: "The start date and time of the event in facility local time (optional)"
         },
         duration: {
           type: "string",
-          description: "The duration of the event in time span format (e.g. '0:30:00' for 30 minutes). Must be between 1 minute and 12 hours for appointments."
+          description: "The duration of the event in time span format (e.g. '0:30:00' for 30 minutes). Must be between 1 minute and 12 hours for appointments. (optional)"
         },
         appointmentConfirmation: {
           type: "object",
@@ -842,7 +842,7 @@ export const PRACTICE_FUSION_TOOLS = [
             }
           },
           required: ["appointmentConfirmed"],
-          description: "Appointment confirmation details"
+          description: "Appointment confirmation details (optional)"
         },
         appointmentStatus: {
           type: "object",
@@ -861,10 +861,10 @@ export const PRACTICE_FUSION_TOOLS = [
             }
           },
           required: ["statusName"],
-          description: "Appointment status details"
+          description: "Appointment status details (optional)"
         }
       },
-      required: ["eventId", "practiceGuid", "eventType", "startDateTimeUtc", "startDateTimeFlt", "duration"]
+      required: ["eventId"]
     }
   },
   {

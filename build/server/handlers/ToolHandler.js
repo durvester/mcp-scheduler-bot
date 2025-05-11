@@ -307,55 +307,58 @@ export class ToolHandler {
                                     }]
                             };
                         }
-                        if (!updateEventData) {
+                        if (!updateEventData || Object.keys(updateEventData).length === 0) {
                             return {
                                 content: [{
                                         type: "text",
-                                        text: "Event data is required"
+                                        text: "At least one field to update is required"
                                     }]
                             };
                         }
-                        // Validate required fields for update
-                        if (!updateEventData.practiceGuid || !updateEventData.eventType ||
-                            !updateEventData.startDateTimeUtc || !updateEventData.startDateTimeFlt ||
-                            !updateEventData.duration) {
+                        // If eventType is provided, validate it has required fields
+                        if (updateEventData.eventType) {
+                            // If providing partial eventType, make sure required fields are included
+                            if (!updateEventData.eventType.eventTypeGuid || !updateEventData.eventType.eventCategory) {
+                                return {
+                                    content: [{
+                                            type: "text",
+                                            text: "When providing eventType, it must include eventTypeGuid and eventCategory"
+                                        }]
+                                };
+                            }
+                        }
+                        try {
+                            // Note: The implementation will first fetch the existing event 
+                            // and merge your changes with the current data
+                            result = await this.calendarClient.updateEvent(updateEventId, updateEventData);
                             return {
                                 content: [{
                                         type: "text",
-                                        text: "Missing required fields: practiceGuid, eventType, startDateTimeUtc, startDateTimeFlt, and/or duration"
+                                        text: JSON.stringify(result, null, 2)
                                     }]
                             };
                         }
-                        // Additional validation for eventType
-                        if (!updateEventData.eventType.eventTypeGuid || !updateEventData.eventType.eventCategory) {
+                        catch (error) {
+                            console.error(`Error in update_event handler:`, error);
+                            // Provide more detailed error messages
+                            let errorMessage = `Error updating event: ${error.message || "Unknown error"}`;
+                            // Add hint for common issues
+                            if (error.message?.includes('not found') || error.message?.includes('404')) {
+                                errorMessage += "\nHint: The event may not exist or you may not have permission to update it.";
+                            }
+                            else if (error.message?.includes('startDateTimeUtc') || error.message?.includes('startDateTimeFlt')) {
+                                errorMessage += "\nHint: There may be an issue with the date format. Use ISO format (YYYY-MM-DDTHH:MM:SSZ).";
+                            }
+                            else if (error.message?.includes('appointment')) {
+                                errorMessage += "\nHint: Make sure appointment-specific fields are provided for appointment events.";
+                            }
                             return {
                                 content: [{
                                         type: "text",
-                                        text: "eventType must include eventTypeGuid and eventCategory"
+                                        text: errorMessage
                                     }]
                             };
                         }
-                        // Clean up optional fields if they're empty
-                        const cleanedEventData = {
-                            practiceGuid: updateEventData.practiceGuid,
-                            eventType: updateEventData.eventType,
-                            startDateTimeUtc: updateEventData.startDateTimeUtc,
-                            startDateTimeFlt: updateEventData.startDateTimeFlt,
-                            duration: updateEventData.duration,
-                            ...(updateEventData.ehrUserGuid && { ehrUserGuid: updateEventData.ehrUserGuid }),
-                            ...(updateEventData.facilityGuid && { facilityGuid: updateEventData.facilityGuid }),
-                            ...(updateEventData.patientPracticeGuid && { patientPracticeGuid: updateEventData.patientPracticeGuid }),
-                            ...(updateEventData.chiefComplaint && { chiefComplaint: updateEventData.chiefComplaint }),
-                            ...(updateEventData.appointmentConfirmation && Object.keys(updateEventData.appointmentConfirmation).length > 0 && { appointmentConfirmation: updateEventData.appointmentConfirmation }),
-                            ...(updateEventData.appointmentStatus && Object.keys(updateEventData.appointmentStatus).length > 0 && { appointmentStatus: updateEventData.appointmentStatus })
-                        };
-                        result = await this.calendarClient.updateEvent(updateEventId, cleanedEventData);
-                        return {
-                            content: [{
-                                    type: "text",
-                                    text: JSON.stringify(result, null, 2)
-                                }]
-                        };
                     case "find_payers":
                         const payerSearchParams = (request.params?.arguments || {});
                         result = await this.payerClient.findPayers(payerSearchParams);
