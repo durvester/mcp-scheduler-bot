@@ -5,7 +5,7 @@ import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { AuthConfig } from "./server/utils/AuthConfig.js";
 import { PRACTICE_FUSION_TOOLS } from "./server/constants/practicefusion-tools.js";
 
-// Config values from claude_desktop_config_practicefusion.json
+// Config values for Practice Fusion
 const authConfig: AuthConfig = {
   clientId: "0279efe9-00d2-4e9a-9b5c-a20142340095",
   clientSecret: "FBUI1EH/OYeFt6d8+ruxwhd6a/8JJn/8eVc7ScA4YBA=",

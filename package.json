@@ -1,11 +1,11 @@
 {
-  "name": "agent-care",
+  "name": "practice-fusion-mcp-server",
   "version": "0.1.0",
-  "description": "An MCP Server for EHRs",
+  "description": "An MCP Server for Practice Fusion EMR",
   "private": true,
   "type": "module",
   "bin": {
-    "agent-care": "./build/index.js"
+    "practice-fusion-mcp": "./build/index.js"
   },
   "files": [
     "build"

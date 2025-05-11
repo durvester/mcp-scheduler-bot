@@ -12,7 +12,7 @@ async function testPracticeFusionApis() {
         // Read config
         const configPath = path.join(__dirname, '..', 'config', 'claude_desktop_config_practicefusion.json');
         const configFile = JSON.parse(readFileSync(configPath, 'utf8'));
-        const config = configFile.mcpServers['mcp-scheduler-bot'].env;
+        const config = configFile.mcpServers['practice-fusion-mcp'].env;
         // Initialize auth
         auth = new Auth({
             clientId: config.OAUTH_CLIENT_ID,
