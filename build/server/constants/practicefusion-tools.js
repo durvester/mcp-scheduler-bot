@@ -1,7 +1,7 @@
 export const PRACTICE_FUSION_TOOLS = [
     {
         name: "get_users",
-        description: "Get all users in the Practice Fusion practice",
+        description: "Retrieve practice staff directory including providers, administrators, and other users. Use for finding provider information for appointment scheduling or getting user roles and contact details. Access via 'practice://users' resource for summary view. FIELDS: profile (names), login (email, status), roles (permissions).",
         inputSchema: {
             type: "object",
             properties: {
@@ -19,7 +19,7 @@ export const PRACTICE_FUSION_TOOLS = [
     },
     {
         name: "get_facilities",
-        description: "Get all facilities in the Practice Fusion practice",
+        description: "Get practice locations with addresses, contact information, and operational details. Essential for appointment scheduling - appointments must be assigned to specific facilities. Use 'practice://facilities' resource for quick overview. FILTERS: status (active/inactive), includeDetails for comprehensive facility data.",
         inputSchema: {
             type: "object",
             properties: {
@@ -38,7 +38,7 @@ export const PRACTICE_FUSION_TOOLS = [
     },
     {
         name: "search_patients",
-        description: "Search for patients in the Practice Fusion practice. Note: First name, last name, and gender work like AND conditions, while birth date works like OR condition.",
+        description: "Search for patients in the Practice Fusion practice. Use for finding patients by name, demographics, or identifiers. TIP: Use multiple criteria for better results - combine FirstName + LastName, or try partial names. BirthDate works as OR condition (broader search). For workflow guidance, use the 'patient-search-optimization' prompt.",
         inputSchema: {
             type: "object",
             properties: {
@@ -93,7 +93,7 @@ export const PRACTICE_FUSION_TOOLS = [
     },
     {
         name: "get_patient_v4",
-        description: "Get a patient by their Practice Fusion ID using the v4 API. Always includes profile, contact, and demographics information.",
+        description: "Retrieve comprehensive patient information by GUID. Returns complete profile, contact details, and demographics. Use after search_patients to get full patient data. EXAMPLE: Use patient GUID from search results to get detailed information for appointment scheduling or record updates.",
         inputSchema: {
             type: "object",
             properties: {
@@ -116,7 +116,7 @@ export const PRACTICE_FUSION_TOOLS = [
     },
     {
         name: "create_patient_v4",
-        description: "Create a new patient in the Practice Fusion practice using the v4 API. Note: Phone numbers must be 10 digits, dates must be in MM/DD/YYYY format, and state codes must be valid two-letter US state codes.",
+        description: "Register a new patient with complete profile and contact information. REQUIRED: firstName, lastName, sex, birthDate, address (streetAddress1, city, state, postalCode). TIPS: Use 'patient-intake' prompt for guided workflow. Validates phone numbers (10 digits), dates (MM/DD/YYYY), and state codes (2-letter).",
         inputSchema: {
             type: "object",
             properties: {
@@ -291,7 +291,7 @@ export const PRACTICE_FUSION_TOOLS = [
     },
     {
         name: "update_patient_v4",
-        description: "Update an existing patient in the Practice Fusion practice using the v4 API. Note: Phone numbers must be 10 digits, dates must be in MM/DD/YYYY format, and state codes must be valid two-letter US state codes. Requires OAuth2 scopes: patient:a_contact_v4, patient:a_ssn_v3, patient:a_demographics_v1, patient:a_active_status_v1. Returns the updated patient data including lastModifiedDateTimeUtc.",
+        description: "Update existing patient information including contact details, demographics, or profile data. WORKFLOW: Get current patient data first, then update specific fields. EXAMPLE: Change address, phone, email, or demographic information. Use 'update-patient-info' prompt for guided process. All validation rules apply (phone format, dates, state codes).",
         inputSchema: {
             type: "object",
             properties: {
@@ -576,7 +576,7 @@ export const PRACTICE_FUSION_TOOLS = [
     },
     {
         name: "get_event_types",
-        description: "Get all calendar event types in the Practice Fusion practice. This includes both appointment types and blocked time types.",
+        description: "Get available appointment types and blocked time categories for scheduling. ESSENTIAL: Required before creating any calendar events - provides eventTypeGuid needed for create_event. TYPES: Appointment (patient visits) and BlockedTime (provider unavailable). Access via 'practice://event-types' resource for summary.",
         inputSchema: {
             type: "object",
             properties: {},
@@ -585,7 +585,7 @@ export const PRACTICE_FUSION_TOOLS = [
     },
     {
         name: "query_events",
-        description: "Query for existing events that match the given criteria. Returns events within the specified time range and optional filters.",
+        description: "Search appointments and blocked time within date ranges. Use for checking availability, viewing schedules, or finding conflicts. EXAMPLE: Find all appointments for a provider on specific dates. FILTER: by provider (ehrUserGuid), facility (facilityGuid), or event type (Appointment/BlockedTime). Use 'check-availability' prompt for guided searches.",
         inputSchema: {
             type: "object",
             properties: {
@@ -651,7 +651,7 @@ export const PRACTICE_FUSION_TOOLS = [
     },
     {
         name: "create_event",
-        description: "Create a new calendar event (appointment or blocked time).",
+        description: "Schedule new appointments or block provider time. WORKFLOW: 1) Check availability with query_events, 2) Get event types, 3) Create appointment. REQUIRED: practiceGuid, eventType, startDateTimeUtc, startDateTimeFlt, duration. TIP: Use 'schedule-appointment' prompt for complete guided workflow including patient lookup and validation.",
         inputSchema: {
             type: "object",
             properties: {
@@ -758,7 +758,7 @@ export const PRACTICE_FUSION_TOOLS = [
     },
     {
         name: "update_event",
-        description: "Update an existing calendar event (appointment or blocked time). You only need to provide the fields you want to update - the implementation will fetch the current event and merge your changes.",
+        description: "Modify appointment details like time, provider, patient, or status. PARTIAL UPDATES: Only provide fields to change (automatically merges with existing data). COMMON USES: Reschedule appointment, change status (Pending/Confirmed/InLobby/InRoom/Completed), update patient or provider. Use 'reschedule-appointment' or 'appointment-status-update' prompts for guided workflows.",
         inputSchema: {
             type: "object",
             properties: {
@@ -869,7 +869,7 @@ export const PRACTICE_FUSION_TOOLS = [
     },
     {
         name: "find_payers",
-        description: "Search for payers in the Practice Fusion system based on optional filters.",
+        description: "Search insurance payers/companies by name or code. Use when setting up patient insurance or verifying coverage. EXAMPLE: Search 'Aetna', 'Blue Cross', or specific payer codes. WORKFLOW: Find payer → get insurance plans → create patient insurance plan. Access payer directory via 'payers://directory' resource.",
         inputSchema: {
             type: "object",
             properties: {
@@ -1005,7 +1005,7 @@ export const PRACTICE_FUSION_TOOLS = [
     },
     {
         name: "create_patient_insurance_plan",
-        description: "Create a new insurance plan for a patient.",
+        description: "Add insurance coverage to a patient's record. PREREQUISITE: Get planGuid and payerGuid from find_payers and get_payer_insurance_plans first. REQUIRED: relationshipToInsured, insuredId, orderOfBenefits, coverageStartDate, coPayType, baseCopay, insurancePlan details. Use 'insurance-verification' prompt for complete guided setup.",
         inputSchema: {
             type: "object",
             properties: {

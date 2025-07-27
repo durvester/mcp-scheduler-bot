@@ -1,0 +1,20 @@
+HTTP/1.1 200 OK
+X-Powered-By: Express
+Vary: Origin
+Access-Control-Allow-Credentials: true
+Access-Control-Expose-Headers: MCP-Protocol-Version,Mcp-Session-Id
+X-Content-Type-Options: nosniff
+X-Frame-Options: DENY
+X-XSS-Protection: 1; mode=block
+Referrer-Policy: strict-origin-when-cross-origin
+Cache-Control: no-cache, no-store, must-revalidate
+Pragma: no-cache
+Expires: 0
+Mcp-Session-Id: mdl82pnc_a6a03a4ae98d46d6a5f0e163f9d0d702
+Content-Type: application/json; charset=utf-8
+Content-Length: 275
+ETag: W/"113-ygz069jrLq5rHG9ipUmimUN1aRs"
+Date: Sun, 27 Jul 2025 05:12:13 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
