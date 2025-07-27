@@ -19,18 +19,22 @@
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.11.1",
     "axios": "^1.7.8",
+    "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "node-cache": "^5.1.2",
     "node-fetch": "^3.3.2",
     "simple-oauth2": "^5.1.0",
+    "uuid": "^11.0.4",
     "zod": "^3.24.4"
   },
   "devDependencies": {
+    "@types/cors": "^2.8.17",
     "@types/electron": "^1.6.12",
     "@types/express": "^5.0.0",
     "@types/node": "^20.17.46",
     "@types/simple-oauth2": "^5.0.7",
+    "@types/uuid": "^10.0.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.3.3"
   }

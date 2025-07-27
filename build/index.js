@@ -3,12 +3,46 @@ import dotenv from "dotenv";
 import { AgentCareServer } from "./server/AgentCareServer.js";
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { PRACTICE_FUSION_TOOLS } from "./server/constants/practicefusion-tools.js";
+import { Logger } from "./server/utils/Logger.js";
+import { createTransportConfigFromEnv, validateTransportConfig, generateTransportEnvDocs } from "./server/config/TransportConfig.js";
 // Load environment variables from .env file
 dotenv.config();
-// Config values from environment variables
+// Initialize logger
+const logger = Logger.create('MCP Server');
+// Validate environment variables (credentials are optional at startup)
+function validateEnvironment() {
+    // Check if credentials are provided
+    const hasCredentials = process.env.PF_CLIENT_ID && process.env.PF_CLIENT_SECRET;
+    if (!hasCredentials) {
+        logger.warn('Practice Fusion credentials not provided at startup');
+        logger.warn('Server will start normally, but tools/resources requiring Practice Fusion API will trigger OAuth when accessed');
+        logger.info('To configure credentials, create a .env file with:');
+        logger.info('PF_CLIENT_ID=your_client_id_here');
+        logger.info('PF_CLIENT_SECRET=your_client_secret_here');
+        logger.info('');
+    }
+    else {
+        logger.info('Practice Fusion credentials found - OAuth will be available for tools/resources');
+    }
+}
+// Validate environment before proceeding
+validateEnvironment();
+// Create and validate transport configuration
+const transportConfig = createTransportConfigFromEnv();
+try {
+    validateTransportConfig(transportConfig);
+    logger.info('Transport configuration validated', { transport: transportConfig.type });
+}
+catch (error) {
+    logger.error('Invalid transport configuration', {}, error);
+    logger.info('\nTransport Configuration Options:');
+    logger.info(generateTransportEnvDocs());
+    process.exit(1);
+}
+// Config values from environment variables (with defaults for missing credentials)
 const authConfig = {
-    clientId: process.env.PF_CLIENT_ID || "0279efe9-00d2-4e9a-9b5c-a20142340095",
-    clientSecret: process.env.PF_CLIENT_SECRET || "FBUI1EH/OYeFt6d8+ruxwhd6a/8JJn/8eVc7ScA4YBA=",
+    clientId: process.env.PF_CLIENT_ID || "not-configured",
+    clientSecret: process.env.PF_CLIENT_SECRET || "not-configured",
     tokenHost: process.env.PF_API_URL || "https://qa-api.practicefusion.com",
     tokenPath: process.env.PF_TOKEN_PATH || "/ehr/oauth2/token",
     authorizePath: process.env.PF_AUTHORIZE_PATH || "/ehr/oauth2/auth",
@@ -24,21 +58,28 @@ let mcpServer = new Server({
     version: "0.1.0"
 }, {
     capabilities: {
-        resources: {},
+        resources: {
+            subscribe: true,
+            listChanged: true
+        },
         tools: {
             list: PRACTICE_FUSION_TOOLS,
             listChanged: true
         },
-        prompts: {},
+        prompts: {
+            listChanged: true
+        },
         logging: {}
     }
 });
 // Add error handling
 mcpServer.onerror = (error) => {
-    console.error("[MCP Server] Error:", error);
+    logger.error("MCP Server error", {}, error);
 };
-const agentCareServer = new AgentCareServer(mcpServer, authConfig, baseUrl);
+const agentCareServer = new AgentCareServer(mcpServer, authConfig, baseUrl, transportConfig);
 agentCareServer.run().catch((error) => {
-    console.error("[MCP Server] Fatal error:", error);
+    logger.error("Fatal error during server startup", {}, error);
+    console.error("STARTUP ERROR:", error);
+    console.error("ERROR STACK:", error.stack);
     process.exit(1);
 });

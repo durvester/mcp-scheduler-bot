@@ -6,6 +6,7 @@ import { exec } from 'node:child_process';
 import { AuthConfig, Token } from "./AuthConfig.js";
 import { fileURLToPath } from 'url';
 import axios from 'axios';
+import { Logger } from './Logger.js';
 
 interface StateHandler {
     resolve: (value: any) => void;
@@ -19,9 +20,12 @@ export class Auth {
   private authState = new Map<string, StateHandler>();
   private token: Token | null = null;
   private callbackServer: any;
+  private refreshPromise: Promise<void> | null = null;
+  private logger: Logger;
 
   constructor(authConfig:AuthConfig) {
     this.authConfig = authConfig;
+    this.logger = Logger.create('Auth');
       
     this.oauth2 = new AuthorizationCode({
       client: {
@@ -35,7 +39,10 @@ export class Auth {
       }
     });
     
-    this.setupCallbackServer();
+    // Only setup callback server if credentials are actually configured
+    if (authConfig.clientId !== "not-configured" && authConfig.clientSecret !== "not-configured") {
+      this.setupCallbackServer();
+    }
   }
 
   public openBrowser = async (url: string) => {
@@ -72,7 +79,19 @@ export class Auth {
 
     // Only refresh if token is expired or will expire in the next 5 minutes
     if (this.isTokenExpired()) {
-      await this.refreshToken();
+      // Check if a refresh is already in progress
+      if (this.refreshPromise) {
+        this.logger.debug('Token refresh already in progress, waiting...');
+        await this.refreshPromise;
+      } else {
+        // Start a new refresh operation
+        this.refreshPromise = this.refreshToken();
+        try {
+          await this.refreshPromise;
+        } finally {
+          this.refreshPromise = null;
+        }
+      }
     }
 
     return this.token.access_token;
@@ -110,7 +129,8 @@ export class Auth {
             pf_practice_guid: response.data.pf_practice_guid
         };
     } catch (error: any) {
-        throw new Error(`Error getting token: ${error.message} . URL: ${tokenUrl}`);
+        this.logger.error('Failed to exchange code for token', { tokenUrl }, error);
+        throw new Error(`Error getting token: ${error.message}`);
     }
   }
 
@@ -119,6 +139,7 @@ export class Auth {
       throw new Error('No refresh token available');
     }
 
+    this.logger.debug('Refreshing access token...');
     try {
       // Create request body with exact parameters as required by Practice Fusion
       const params = new URLSearchParams();
@@ -149,7 +170,9 @@ export class Auth {
         expires_at: expiresAt,
         pf_practice_guid: response.data.pf_practice_guid
       };
+      this.logger.debug('Access token refreshed successfully');
     } catch (error: any) {
+      this.logger.error('Failed to refresh token', {}, error);
       this.token = null;
       throw error;
     }
@@ -211,6 +234,16 @@ export class Auth {
       if (this.token) {
         await this.ensureValidToken();
         return await operation();
+      }
+
+      // Check if credentials are configured
+      if (this.authConfig.clientId === "not-configured" || this.authConfig.clientSecret === "not-configured") {
+        throw new Error('Practice Fusion credentials not configured. Please set PF_CLIENT_ID and PF_CLIENT_SECRET environment variables.');
+      }
+
+      // Setup callback server if not already done
+      if (!this.callbackServer) {
+        this.setupCallbackServer();
       }
 
       // Need to authenticate first
