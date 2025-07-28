@@ -1,5 +1,5 @@
 import { BaseToolHandler, ToolResponse } from "./BaseToolHandler.js";
-import { PatientsClient, PatientSearchRequest, PatientCreateRequest } from "../connectors/practicefusion/PatientsClient.js";
+import { PatientsClient, PatientSearchRequest, PatientCreateRequest } from "../clients/PatientsClient.js";
 import { ValidationUtil } from "../utils/ValidationUtil.js";
 import { PatientSearchSchema, PatientCreateSchema, PatientUpdateSchema } from "../utils/ValidationSchemas.js";
 import { AuthConfig } from "../utils/AuthConfig.js";

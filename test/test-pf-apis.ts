@@ -1,9 +1,9 @@
-import { Auth } from './server/utils/Auth.js';
+import { Auth } from '../src/server/utils/Auth.js';
 import { readFileSync } from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { UsersClient } from './server/connectors/practicefusion/UsersClient.js';
-import { FacilitiesClient } from './server/connectors/practicefusion/FacilitiesClient.js';
+import { UsersClient } from '../src/server/clients/UsersClient.js';
+import { FacilitiesClient } from '../src/server/clients/FacilitiesClient.js';
 import dotenv from 'dotenv';
 
 // Load environment variables

@@ -1,5 +1,5 @@
 import { BaseToolHandler, ToolResponse } from "./BaseToolHandler.js";
-import { PayerClient, PayerSearchParams } from "../connectors/practicefusion/PayerClient.js";
+import { PayerClient, PayerSearchParams } from "../clients/PayerClient.js";
 import { ValidationUtil } from "../utils/ValidationUtil.js";
 import { PayerSearchSchema, InsurancePlanCreateSchema } from "../utils/ValidationSchemas.js";
 import { AuthConfig } from "../utils/AuthConfig.js";

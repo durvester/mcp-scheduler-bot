@@ -10,11 +10,11 @@ import { AuthConfig } from "../utils/AuthConfig.js";
 import { Logger } from "../utils/Logger.js";
 import { BaseToolHandler } from "./BaseToolHandler.js";
 import { Auth } from "../utils/Auth.js";
-import { UsersClient } from "../connectors/practicefusion/UsersClient.js";
-import { FacilitiesClient } from "../connectors/practicefusion/FacilitiesClient.js";
-import { PatientsClient } from "../connectors/practicefusion/PatientsClient.js";
-import { CalendarClient } from "../connectors/practicefusion/CalendarClient.js";
-import { PayerClient } from "../connectors/practicefusion/PayerClient.js";
+import { UsersClient } from "../clients/UsersClient.js";
+import { FacilitiesClient } from "../clients/FacilitiesClient.js";
+import { PatientsClient } from "../clients/PatientsClient.js";
+import { CalendarClient } from "../clients/CalendarClient.js";
+import { PayerClient } from "../clients/PayerClient.js";
 
 export class ResourceHandler extends BaseToolHandler {
   private usersClient: UsersClient;

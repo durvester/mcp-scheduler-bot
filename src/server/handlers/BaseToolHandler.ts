@@ -2,6 +2,7 @@ import { Auth } from "../utils/Auth.js";
 import { AuthConfig } from "../utils/AuthConfig.js";
 import { Logger } from "../utils/Logger.js";
 import { ValidationUtil } from "../utils/ValidationUtil.js";
+import { ToolArguments } from "../types/tool-types.js";
 
 export interface ToolResponse {
   content: Array<{
@@ -87,5 +88,5 @@ export abstract class BaseToolHandler {
   }
 
   abstract getToolNames(): string[];
-  abstract handleTool(toolName: string, args: any): Promise<ToolResponse>;
+  abstract handleTool(toolName: string, args: ToolArguments): Promise<ToolResponse>;
 }

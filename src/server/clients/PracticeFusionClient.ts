@@ -1,5 +1,6 @@
 import axios, { AxiosInstance } from 'axios';
-import { Auth } from '../../utils/Auth.js';
+import { Auth } from '../utils/Auth.js';
+import { Logger } from '../utils/Logger.js';
 
 export interface PracticeFusionConfig {
     baseUrl: string;
@@ -9,9 +10,11 @@ export interface PracticeFusionConfig {
 export class PracticeFusionClient {
     protected client: AxiosInstance;
     protected auth: Auth;
+    protected logger: Logger;
 
     constructor(config: PracticeFusionConfig) {
         this.auth = config.auth;
+        this.logger = Logger.create('PracticeFusionClient');
         this.client = axios.create({
             baseURL: config.baseUrl,
             headers: {
@@ -33,7 +36,7 @@ export class PracticeFusionClient {
             const response = await this.client.get(path, { params });
             return response.data;
         } catch (error: any) {
-            console.error('PracticeFusion API error:', error.response?.data || error.message);
+            this.logger.error('PracticeFusion API GET error', { path, params: params || {} }, error);
             throw error;
         }
     }
@@ -43,7 +46,7 @@ export class PracticeFusionClient {
             const response = await this.client.post(path, data);
             return response.data;
         } catch (error: any) {
-            console.error('PracticeFusion API error:', error.response?.data || error.message);
+            this.logger.error('PracticeFusion API POST error', { path, data }, error);
             throw error;
         }
     }
@@ -53,7 +56,7 @@ export class PracticeFusionClient {
             const response = await this.client.put(path, data);
             return response.data;
         } catch (error: any) {
-            console.error('PracticeFusion API error:', error.response?.data || error.message);
+            this.logger.error('PracticeFusion API PUT error', { path, data }, error);
             throw error;
         }
     }
