@@ -1,8 +1,8 @@
-import { Auth } from './server/utils/Auth.js';
-import { CalendarClient } from './server/connectors/practicefusion/CalendarClient.js';
-import { FacilitiesClient } from './server/connectors/practicefusion/FacilitiesClient.js';
-import { UsersClient } from './server/connectors/practicefusion/UsersClient.js';
-import { PatientsClient } from './server/connectors/practicefusion/PatientsClient.js';
+import { Auth } from '../src/server/utils/Auth.js';
+import { CalendarClient } from '../src/server/clients/CalendarClient.js';
+import { FacilitiesClient } from '../src/server/clients/FacilitiesClient.js';
+import { UsersClient } from '../src/server/clients/UsersClient.js';
+import { PatientsClient } from '../src/server/clients/PatientsClient.js';
 import dotenv from 'dotenv';
 import { v4 as uuidv4 } from 'uuid';
 import axios from 'axios';

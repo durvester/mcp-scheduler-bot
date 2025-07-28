@@ -1,5 +1,5 @@
-import { Auth } from './server/utils/Auth.js';
-import { CalendarClient } from './server/connectors/practicefusion/CalendarClient.js';
+import { Auth } from '../src/server/utils/Auth.js';
+import { CalendarClient } from '../src/server/clients/CalendarClient.js';
 import dotenv from 'dotenv';
 
 // Load environment variables

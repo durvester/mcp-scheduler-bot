@@ -88,7 +88,7 @@ class V1CalendarClient extends PracticeFusionClient {
       const response = await this.get<{ eventTypes: CalendarEventType[] }>('/eventTypes');
       return response.eventTypes;
     } catch (error) {
-      console.error('Error fetching event types:', error);
+      this.logger.error('Error fetching event types', {}, error as Error);
       throw error;
     }
   }
@@ -114,7 +114,7 @@ export class CalendarClient extends PracticeFusionClient {
     try {
       return await this.get<CalendarEventsResponse>('/events/query', params);
     } catch (error) {
-      console.error('Error querying events:', error);
+      this.logger.error('Error querying events', { params }, error as Error);
       throw error;
     }
   }
@@ -123,7 +123,7 @@ export class CalendarClient extends PracticeFusionClient {
     try {
       return await this.get<CalendarEventResponse>(`/events/${eventId}`);
     } catch (error) {
-      console.error('Error fetching event:', error);
+      this.logger.error('Error fetching event', { eventId }, error as Error);
       throw error;
     }
   }
@@ -132,7 +132,7 @@ export class CalendarClient extends PracticeFusionClient {
     try {
       return await this.get<CalendarEventsResponse>('/events', params);
     } catch (error) {
-      console.error('Error fetching multiple events:', error);
+      this.logger.error('Error fetching multiple events', { params }, error as Error);
       throw error;
     }
   }
@@ -141,7 +141,7 @@ export class CalendarClient extends PracticeFusionClient {
     try {
       return await this.post<CalendarEventResponse>('/events', { event });
     } catch (error) {
-      console.error('Error creating event:', error);
+      this.logger.error('Error creating event', { eventData: event }, error as Error);
       throw error;
     }
   }
@@ -183,7 +183,7 @@ export class CalendarClient extends PracticeFusionClient {
       // Send the complete event object to the API
       return await this.put<CalendarEventResponse>(`/events/${eventId}`, { event: updatedEvent });
     } catch (error) {
-      console.error('Error updating event:', error);
+      this.logger.error('Error updating event', { eventId, updatedFields }, error as Error);
       throw error;
     }
   }

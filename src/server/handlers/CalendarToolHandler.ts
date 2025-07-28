@@ -1,5 +1,6 @@
 import { BaseToolHandler, ToolResponse } from "./BaseToolHandler.js";
-import { CalendarClient, CreateEventRequest } from "../connectors/practicefusion/CalendarClient.js";
+import { ToolArguments } from "../types/tool-types.js";
+import { CalendarClient, CreateEventRequest } from "../clients/CalendarClient.js";
 import { ValidationUtil } from "../utils/ValidationUtil.js";
 import { CalendarEventCreateSchema, CalendarEventUpdateSchema } from "../utils/ValidationSchemas.js";
 import { AuthConfig } from "../utils/AuthConfig.js";
@@ -33,7 +34,7 @@ export class CalendarToolHandler extends BaseToolHandler {
     return this.calendarClient;
   }
 
-  async handleTool(toolName: string, args: any): Promise<ToolResponse> {
+  async handleTool(toolName: string, args: ToolArguments): Promise<ToolResponse> {
     try {
       const client = await this.ensureCalendarClient();
 
@@ -66,7 +67,7 @@ export class CalendarToolHandler extends BaseToolHandler {
     return this.createSuccessResponse(result);
   }
 
-  private async handleQueryEvents(client: CalendarClient, args: any): Promise<ToolResponse> {
+  private async handleQueryEvents(client: CalendarClient, args: ToolArguments): Promise<ToolResponse> {
     const { minimumStartDateTimeUtc, maximumStartDateTimeUtc, eventTypeCategory, ehrUserGuid, facilityGuid } = args || {};
     
     if (!minimumStartDateTimeUtc || !maximumStartDateTimeUtc) {
@@ -74,11 +75,11 @@ export class CalendarToolHandler extends BaseToolHandler {
     }
 
     const queryParams = {
-      minimumStartDateTimeUtc,
-      maximumStartDateTimeUtc,
-      eventTypeCategory,
-      ehrUserGuid,
-      facilityGuid
+      minimumStartDateTimeUtc: minimumStartDateTimeUtc as string,
+      maximumStartDateTimeUtc: maximumStartDateTimeUtc as string,
+      eventTypeCategory: eventTypeCategory as ('Appointment' | 'BlockedTime' | undefined),
+      ehrUserGuid: ehrUserGuid as string | undefined,
+      facilityGuid: facilityGuid as string | undefined
     };
 
     const result = await this.executeWithAuth(() => 
@@ -87,18 +88,18 @@ export class CalendarToolHandler extends BaseToolHandler {
     return this.createSuccessResponse(result);
   }
 
-  private async handleGetEvent(client: CalendarClient, args: any): Promise<ToolResponse> {
+  private async handleGetEvent(client: CalendarClient, args: ToolArguments): Promise<ToolResponse> {
     const { eventId } = args || {};
     
     this.validateRequiredParam(eventId, 'eventId');
 
     const result = await this.executeWithAuth(() => 
-      client.getEvent(eventId)
+      client.getEvent(eventId as string)
     );
     return this.createSuccessResponse(result);
   }
 
-  private async handleGetEvents(client: CalendarClient, args: any): Promise<ToolResponse> {
+  private async handleGetEvents(client: CalendarClient, args: ToolArguments): Promise<ToolResponse> {
     const { eventId: eventIds } = args || {};
     
     if (!eventIds || !Array.isArray(eventIds) || eventIds.length === 0) {
@@ -111,7 +112,7 @@ export class CalendarToolHandler extends BaseToolHandler {
     return this.createSuccessResponse(result);
   }
 
-  private async handleCreateEvent(client: CalendarClient, args: any): Promise<ToolResponse> {
+  private async handleCreateEvent(client: CalendarClient, args: ToolArguments): Promise<ToolResponse> {
     const validation = ValidationUtil.validate(CalendarEventCreateSchema, args);
     if (!validation.success) {
       return this.createValidationErrorResponse(validation.errors!);
@@ -124,7 +125,7 @@ export class CalendarToolHandler extends BaseToolHandler {
     return this.createSuccessResponse(result);
   }
 
-  private async handleUpdateEvent(client: CalendarClient, args: any): Promise<ToolResponse> {
+  private async handleUpdateEvent(client: CalendarClient, args: ToolArguments): Promise<ToolResponse> {
     const validation = ValidationUtil.validate(CalendarEventUpdateSchema, args);
     if (!validation.success) {
       return this.createValidationErrorResponse(validation.errors!);

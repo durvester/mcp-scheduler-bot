@@ -1,6 +1,6 @@
 import { BaseToolHandler, ToolResponse } from "./BaseToolHandler.js";
-import { UsersClient } from "../connectors/practicefusion/UsersClient.js";
-import { FacilitiesClient } from "../connectors/practicefusion/FacilitiesClient.js";
+import { UsersClient } from "../clients/UsersClient.js";
+import { FacilitiesClient } from "../clients/FacilitiesClient.js";
 import { AuthConfig } from "../utils/AuthConfig.js";
 import { Auth } from "../utils/Auth.js";
 

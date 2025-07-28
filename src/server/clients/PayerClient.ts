@@ -150,7 +150,7 @@ export class PayerClient extends PracticeFusionClient {
     try {
       return await this.get<PayersResponse>('/payers', params);
     } catch (error) {
-      console.error('Error finding payers:', error);
+      this.logger.error('Error finding payers', { params }, error as Error);
       throw error;
     }
   }
@@ -160,7 +160,7 @@ export class PayerClient extends PracticeFusionClient {
     try {
       return await this.get<Payer>(`/payers/${payerGuid}`);
     } catch (error) {
-      console.error(`Error fetching payer ${payerGuid}:`, error);
+      this.logger.error('Error fetching payer', { payerGuid }, error as Error);
       throw error;
     }
   }
@@ -170,7 +170,7 @@ export class PayerClient extends PracticeFusionClient {
     try {
       return await this.get<InsurancePlansResponse>(`/payers/${payerGuid}/insurancePlans`, params);
     } catch (error) {
-      console.error(`Error fetching insurance plans for payer ${payerGuid}:`, error);
+      this.logger.error('Error fetching insurance plans for payer', { payerGuid }, error as Error);
       throw error;
     }
   }
@@ -181,7 +181,7 @@ export class PayerClient extends PracticeFusionClient {
       const response = await this.get<InsurancePlan>(`/payers/${payerGuid}/insurancePlans/${planGuid}`);
       return response;
     } catch (error) {
-      console.error(`Error fetching insurance plan ${planGuid} for payer ${payerGuid}:`, error);
+      this.logger.error('Error fetching insurance plan', { planGuid, payerGuid }, error as Error);
       throw error;
     }
   }
@@ -191,7 +191,7 @@ export class PayerClient extends PracticeFusionClient {
     try {
       return await this.get<PatientInsurancePlansResponse>(`/patients/${patientPracticeGuid}/patientInsurancePlans`, params);
     } catch (error) {
-      console.error(`Error fetching insurance plans for patient ${patientPracticeGuid}:`, error);
+      this.logger.error('Error fetching insurance plans for patient', { patientPracticeGuid }, error as Error);
       throw error;
     }
   }
@@ -202,7 +202,7 @@ export class PayerClient extends PracticeFusionClient {
       const response = await this.get<PatientInsurancePlan>(`/patients/${patientPracticeGuid}/patientInsurancePlans/${patientInsurancePlanGuid}`);
       return response;
     } catch (error) {
-      console.error(`Error fetching patient insurance plan ${patientInsurancePlanGuid}:`, error);
+      this.logger.error('Error fetching patient insurance plan', { patientInsurancePlanGuid }, error as Error);
       throw error;
     }
   }
@@ -212,7 +212,7 @@ export class PayerClient extends PracticeFusionClient {
     try {
       return await this.post<PatientInsurancePlan>(`/patients/${patientPracticeGuid}/patientInsurancePlans`, plan);
     } catch (error) {
-      console.error(`Error creating insurance plan for patient ${patientPracticeGuid}:`, error);
+      this.logger.error('Error creating insurance plan for patient', { patientPracticeGuid }, error as Error);
       throw error;
     }
   }
@@ -222,7 +222,7 @@ export class PayerClient extends PracticeFusionClient {
     try {
       return await this.put<PatientInsurancePlan>(`/patients/${patientPracticeGuid}/patientInsurancePlans/${patientInsurancePlanGuid}`, plan);
     } catch (error) {
-      console.error(`Error updating patient insurance plan ${patientInsurancePlanGuid}:`, error);
+      this.logger.error('Error updating patient insurance plan', { patientInsurancePlanGuid }, error as Error);
       throw error;
     }
   }
@@ -232,7 +232,7 @@ export class PayerClient extends PracticeFusionClient {
     try {
       await this.client.delete(`/patients/${patientPracticeGuid}/patientInsurancePlans/${patientInsurancePlanGuid}`);
     } catch (error) {
-      console.error(`Error deactivating patient insurance plan ${patientInsurancePlanGuid}:`, error);
+      this.logger.error('Error deactivating patient insurance plan', { patientInsurancePlanGuid }, error as Error);
       throw error;
     }
   }
@@ -243,7 +243,7 @@ export class PayerClient extends PracticeFusionClient {
       const response = await this.get<string[]>('/subscriberRelationshipOptions');
       return response;
     } catch (error) {
-      console.error('Error fetching subscriber relationship options:', error);
+      this.logger.error('Error fetching subscriber relationship options', {}, error as Error);
       throw error;
     }
   }

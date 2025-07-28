@@ -1,4 +1,4 @@
-import { Auth } from './server/utils/Auth.js';
+import { Auth } from '../src/server/utils/Auth.js';
 import { readFileSync } from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
